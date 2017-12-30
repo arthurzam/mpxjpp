@@ -17,7 +17,8 @@ SOURCES += main.cpp \
     criteria.cpp \
     duration.cpp \
     filter.cpp \
-    projectproperties.cpp
+    projectproperties.cpp \
+    customfield.cpp
 
 HEADERS += \
     daterange.h \
@@ -36,7 +37,6 @@ HEADERS += \
     enums.h \
     listwithcallbacks.h \
     table.h \
-    projecttimeformat.h \
     duration.h \
     timephased.h \
     fieldtype.h \
@@ -59,7 +59,9 @@ HEADERS += \
     criteria.h \
     filter.h \
     taskfield.h \
-    projectproperties.h
+    projectproperties.h \
+    customfield.h \
+    common/uuid.h
 
 #QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin
 #QMAKE_LFLAGS_RELEASE += -flto -fuse-linker-plugin

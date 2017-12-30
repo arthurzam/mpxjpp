@@ -68,6 +68,10 @@ public:
 		return *this;
 	}
 
+	constexpr bool operator ==(const FieldType &o) {
+		return m_arr == o.m_arr && m_value == o.m_value;
+	}
+
 	// CHECK: is needed?
 //	virtual std::string name() const = 0;
 //	virtual std::string name(Locale &locale) const = 0;

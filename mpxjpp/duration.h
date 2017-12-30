@@ -137,6 +137,8 @@ class Duration final {
 			}
 			return ::abs(m_duration - rhs.m_duration) < 0.00001 ? 0 : m_duration < rhs.m_duration ? -1 : 1;
 		}
+
+		static Duration add(Duration a, Duration b, ProjectProperties &defaults);
 };
 
 static_assert(std::is_polymorphic<Duration>::value == false, "Duration has vtable!");
