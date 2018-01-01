@@ -192,7 +192,7 @@ int GraphicalIndicator::evaluate(FieldContainer *container) {
 			else
 				criteria = &m_nonSummaryRowCriteria;
 		} else {
-			if (!task->getSummary())
+			if (!task->summary())
 				criteria = &m_nonSummaryRowCriteria;
 			else if (!m_summaryRowsInheritFromNonSummaryRows)
 				criteria = &m_summaryRowCriteria;

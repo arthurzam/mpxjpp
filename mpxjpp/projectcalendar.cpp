@@ -1,4 +1,8 @@
 #include "projectcalendar.h"
+#include "projectproperties.h"
+#include "projectfile.h"
+
+#include "common/strutils.h"
 
 using namespace mpxjpp;
 
@@ -12,14 +16,20 @@ void ProjectCalendarHours::set_day(Day d) {
 constexpr DateRange ProjectCalendarWeek::DEFAULT_WORKING_MORNING;
 constexpr DateRange ProjectCalendarWeek::DEFAULT_WORKING_AFTERNOON;
 
-const ProjectCalendarHours *ProjectCalendarWeek::getHours(Day day) {
-	const ProjectCalendarHours *res = getCalendarHours(day);
+const ProjectCalendarHours *ProjectCalendarWeek::hours(Day day) {
+	const ProjectCalendarHours *res = calendarHours(day);
 	if (res)
 		return res;
 	if (m_parent)
-		return m_parent->getHours(day);
+		return m_parent->hours(day);
 	addDefaultCalendarHours(day);
-	return getCalendarHours(day);
+	return calendarHours(day);
+}
+
+ProjectCalendar::ProjectCalendar(ProjectFile &file) :
+	m_projectFile(file) {
+	if (m_projectFile.projectConfig().autoCalendarUniqueID() == true)
+	   set_uniqueID(m_projectFile.projectConfig().getNextCalendarUniqueID());
 }
 
 void ProjectCalendar::clearWorkingDateCache() {
@@ -49,11 +59,51 @@ void ProjectCalendar::sortWorkWeeks() {
 	}
 }
 
-// TODO: continue
+void ProjectCalendarContainer::removed(const std::shared_ptr<ProjectCalendar> &cal) {
+//	Resource resource = cal->getResource();
+//	if (resource != null)
+//	   resource.setResourceCalendar(null);
+	cal->set_parent(nullptr);
+}
+
+std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::addDefaultBaseCalendar() {
+	auto cal = add();
+	cal->set_name(ProjectCalendar::DEFAULT_BASE_CALENDAR_NAME);
+	cal->addDefaultCalendarHours();
+
+	cal->set_workingDay(Day::SUNDAY, false);
+	cal->set_workingDay(Day::MONDAY, true);
+	cal->set_workingDay(Day::TUESDAY, true);
+	cal->set_workingDay(Day::WEDNESDAY, true);
+	cal->set_workingDay(Day::THURSDAY, true);
+	cal->set_workingDay(Day::FRIDAY, true);
+	cal->set_workingDay(Day::SATURDAY, false);
+	return (cal);
+}
+
+std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::addDefaultDerivedCalendar() {
+	auto cal = add();
+	cal->set_name(ProjectCalendar::DEFAULT_BASE_CALENDAR_NAME);
+	cal->set_workingDay(Day::SUNDAY, DayType::DEFAULT);
+	cal->set_workingDay(Day::MONDAY, DayType::DEFAULT);
+	cal->set_workingDay(Day::TUESDAY, DayType::DEFAULT);
+	cal->set_workingDay(Day::WEDNESDAY, DayType::DEFAULT);
+	cal->set_workingDay(Day::THURSDAY, DayType::DEFAULT);
+	cal->set_workingDay(Day::FRIDAY, DayType::DEFAULT);
+	cal->set_workingDay(Day::SATURDAY, DayType::DEFAULT);
+	return (cal);
+}
 
 std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::getByName(const std::string &calendarName) const {
-	for (const auto &calendar : *this) {
-		const std::string &name = calendar->name();
-		//name
+	if (!calendarName.empty()) {
+		const std::string calName = common::str_toupper(calendarName);
+		for (const auto &calendar : *this) {
+			const std::string &name = calendar->name();
+			if (!name.empty() && common::str_toupper(name) == calName)
+				return calendar;
+		}
 	}
+	return std::shared_ptr<ProjectCalendar>();
 }
+
+// TODO: continue

@@ -178,7 +178,7 @@ public:
 	 * @param day Day instance
 	 * @return calendar hours
 	 */
-	const ProjectCalendarHours *getCalendarHours(Day day) const {
+	const ProjectCalendarHours *calendarHours(Day day) const {
 		return (m_hours[static_cast<int>(day)- 1].get());
 	}
 
@@ -188,7 +188,7 @@ public:
 	 *
 	 * @return array of calendar hours
 	 */
-	const std::array<std::unique_ptr<ProjectCalendarHours>, 7> &getHours() const {
+	const std::array<std::unique_ptr<ProjectCalendarHours>, 7> &hours() const {
 		return m_hours;
 	}
 
@@ -201,7 +201,7 @@ public:
 	 * @param day Day instance
 	 * @return calendar hours
 	 */
-	const ProjectCalendarHours *getHours(Day day);
+	const ProjectCalendarHours *hours(Day day);
 
 	/**
 	 * This is a convenience method used to add a default set of calendar
@@ -252,25 +252,25 @@ public:
 		m_hours[static_cast<int>(hours.day()) - 1].reset(nullptr);
 	}
 
-	const std::array<DayType, 7> &getDays() const {
+	const std::array<DayType, 7> &days() const {
 		return m_days;
 	}
 
-	DayType getWorkingDay(Day day) {
+	DayType workingDay(Day day) {
 		return m_days[static_cast<int>(day) - 1];
 	}
 
-	void setWorkingDay(Day day, DayType working) {
+	void set_workingDay(Day day, DayType working) {
 		m_days[static_cast<int>(day) - 1] =
 				(working != DayType::__UNINITIALIZED__) ? working :
 				isDerived() ? DayType::DEFAULT : DayType::WORKING;
 	}
 
-	void setWorkingDay(Day day, bool working) {
-		setWorkingDay(day, (working ? DayType::WORKING : DayType::NON_WORKING));
+	void set_workingDay(Day day, bool working) {
+		set_workingDay(day, (working ? DayType::WORKING : DayType::NON_WORKING));
 	}
 
-	bool operator < (const ProjectCalendarWeek &o) {
+	bool operator <(const ProjectCalendarWeek &o) {
 		return m_dateRange.start() < o.m_dateRange.start();
 	}
 };
@@ -314,6 +314,7 @@ public:
 	MPXJPP_SETTER(minutesPerWeek, int)
 	MPXJPP_SETTER(minutesPerMonth, int)
 	MPXJPP_SETTER(minutesPerYear, int)
+	MPXJPP_GETTER_SETTER(uniqueID, int)
 
 	ProjectCalendarWeek *addWorkWeek();
 	void clearWorkWeeks() {
@@ -346,11 +347,17 @@ private:
 
 class ProjectCalendarContainer final : public ProjectEntityContainer<ProjectCalendar> {
 protected:
-	virtual void removed(const std::shared_ptr<ProjectCalendar> &) override;
+	virtual void removed(const std::shared_ptr<ProjectCalendar> &cal) override;
 public:
 	ProjectCalendarContainer(ProjectFile &file) :
 		ProjectEntityContainer<ProjectCalendar>(file)
 	{}
+
+	std::shared_ptr<ProjectCalendar> add() {
+		std::shared_ptr<ProjectCalendar> r = std::make_shared<ProjectCalendar>(m_mpx);
+		ListWithCallbacks<std::shared_ptr<ProjectCalendar>>::add(r);
+		return r;
+	}
 
 	std::shared_ptr<ProjectCalendar> addDefaultBaseCalendar();
 	std::shared_ptr<ProjectCalendar> addDefaultDerivedCalendar();

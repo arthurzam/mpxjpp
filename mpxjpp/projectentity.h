@@ -18,7 +18,7 @@ class ProjectEntity {
 			: m_mpx(mpx)
 		{ }
 
-		ProjectFile &getParentFile() {
+		ProjectFile &parentFile() {
 			return m_mpx;
 		}
 };
@@ -33,7 +33,7 @@ class ProjectEntityWithUniqueID {
 		 *
 		 * @return Unique ID value
 		 */
-		virtual int uniqueID() = 0;
+		virtual int uniqueID() const = 0;
 
 		/**
 		 * Set the Unique ID value of the entity.
@@ -53,20 +53,18 @@ public:
 	 *
 	 * @return ID value
 	 */
-	virtual int getID() = 0;
+	virtual int id() const = 0;
 
 	/**
 	 * Set the ID value of the entity.
 	 *
 	 * @param id ID value
 	 */
-	virtual void setID(int id) = 0;
+	virtual void set_id(int id) = 0;
 };
 
 template <typename T>
 class ProjectEntityContainer : public ListWithCallbacks<std::shared_ptr<T>> {
-private:
-	static constexpr int MS_PROJECT_MAX_UNIQUE_ID = 0x1FFFFF;
 protected:
 	ProjectFile &m_mpx;
 	std::map<int, std::shared_ptr<T>> m_uniqueIDMap;
@@ -87,6 +85,7 @@ public:
 	}
 
 	void validateUniqueIDsForMicrosoftProject() {
+		static constexpr int MS_PROJECT_MAX_UNIQUE_ID = 0x1FFFFF;
 		if (!this->empty())
 			for (const std::shared_ptr<T> &entity : *this)
 				if (entity->getUniqueID() > MS_PROJECT_MAX_UNIQUE_ID)
@@ -118,11 +117,11 @@ public:
 		if (!this->empty()) {
 			std::sort(this->begin(), this->end(),
 					  [] (const std::shared_ptr<T> &a, const std::shared_ptr<T> &b) { return *a < *b; });
-			int id = this->m_list.front()->getID();
+			int id = this->m_list.front()->id();
 			if (id != 0)
 				id = 1;
 			for (auto &entity : *this)
-				entity->setID(id++);
+				entity->set_id(id++);
 		}
 	}
 

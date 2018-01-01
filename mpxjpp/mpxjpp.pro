@@ -18,7 +18,8 @@ SOURCES += main.cpp \
     duration.cpp \
     filter.cpp \
     projectproperties.cpp \
-    customfield.cpp
+    customfield.cpp \
+    projectfile.cpp
 
 HEADERS += \
     daterange.h \
@@ -60,7 +61,8 @@ HEADERS += \
     taskfield.h \
     projectproperties.h \
     customfield.h \
-    common/uuid.h
+    common/uuid.h \
+    projectfile.h
 
 #QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin
 #QMAKE_LFLAGS_RELEASE += -flto -fuse-linker-plugin
