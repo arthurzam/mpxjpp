@@ -222,3 +222,46 @@ bool Filter::evaluate(FieldContainer *container, std::unordered_map<GenericCrite
 					return true;
 	return true; // CHECK: maybe false - error in upstream
 }
+
+void FilterContainer::addFilter(std::unique_ptr<Filter> &&filter) {
+	if (filter->isTaskFilter())
+		m_taskFilters.push_back(std::move(filter));
+	else if (filter->isResourceFilter())
+		m_resourceFilters.push_back(std::move(filter));
+	else
+		throw std::invalid_argument("filter isn't task or resource filter --> bad algorithms comming");
+}
+
+void FilterContainer::removeFilter(const std::string &filterName) {
+	for (auto iter = m_taskFilters.begin(), end = m_taskFilters.end(); iter != end; ++iter)
+		if ((*iter)->name() == filterName) {
+			m_taskFilters.erase(iter);
+			return;
+		}
+	for (auto iter = m_resourceFilters.begin(), end = m_resourceFilters.end(); iter != end; ++iter)
+		if ((*iter)->name() == filterName) {
+			m_resourceFilters.erase(iter);
+			return;
+		}
+}
+
+Filter *FilterContainer::getFilterByName(const std::string &name) const {
+	for (const auto &filter : m_resourceFilters)
+		if (filter->name() == name)
+			return filter.get();
+	for (const auto &filter : m_taskFilters)
+		if (filter->name() == name)
+			return filter.get();
+	return nullptr;
+}
+
+Filter *FilterContainer::getFilterByID(int id) const {
+	for (const auto &filter : m_resourceFilters)
+		if (filter->id() == id)
+			return filter.get();
+	for (const auto &filter : m_taskFilters)
+		if (filter->id() == id)
+			return filter.get();
+	return nullptr;
+
+}

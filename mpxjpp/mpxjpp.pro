@@ -16,7 +16,6 @@ SOURCES += main.cpp \
     resourceassignment.cpp \
     criteria.cpp \
     duration.cpp \
-    filter.cpp \
     projectproperties.cpp \
     customfield.cpp \
     projectfile.cpp
