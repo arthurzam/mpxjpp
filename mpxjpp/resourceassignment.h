@@ -10,6 +10,7 @@
 #include "mpxjpp-gens.h"
 #include "projectentity.h"
 #include "timephased.h"
+#include "enums.h"
 
 namespace mpxjpp {
 
@@ -58,13 +59,44 @@ private:
 public:
 	ResourceAssignment(ProjectFile &file, std::shared_ptr<Task> task);
 
-	int getUniqueID() override {
-		return getCachedValue(AssignmentField(AssignmentField::UNIQUE_ID)).cast<int>();
+	const ResourceAssignmentWorkgroupFields &workgroupAssignment() const {
+		return m_workgroup;
 	}
+	// Task getTask(); #449
+	// Resource getResource(); #464
+	// void remove(); #492
+	// List<TimephasedWork> getTimephasedActualWork(); #543
+	// void setTimephasedActualWork(TimephasedWorkContainer data); #554
 
-	void setUniqueID(int id) override {
-		set(AssignmentField(AssignmentField::UNIQUE_ID), common::any(id));
-	}
+	using Date = std::time_t;
+
+#define FIELDTYPE_CLASS AssignmentField
+	MPXJPP_FIELD_GETTER_SETTER(uniqueID, int, UNIQUE_ID, int)
+	MPXJPP_FIELD_GETTER_SETTER(units, double, ASSIGNMENT_UNITS, double)
+	MPXJPP_FIELD_GETTER_SETTER(work, Duration, WORK, Duration)
+	MPXJPP_FIELD_GETTER_SETTER(baselineStart, Date, BASELINE_START, Date)
+	MPXJPP_FIELD_GETTER_SETTER(actualStart, Date, ACTUAL_START, Date)
+	MPXJPP_FIELD_GETTER_SETTER(baselineFinish, Date, BASELINE_FINISH, Date)
+	MPXJPP_FIELD_GETTER_SETTER(actualFinish, Date, ACTUAL_FINISH, Date)
+	MPXJPP_FIELD_GETTER_SETTER(baselineWork, Duration, BASELINE_WORK, Duration)
+	MPXJPP_FIELD_GETTER_SETTER(actualWork, Duration, ACTUAL_WORK, Duration)
+	MPXJPP_FIELD_GETTER_SETTER(overtimeWork, Duration, OVERTIME_WORK, Duration)
+	MPXJPP_FIELD_GETTER_SETTER(cost, double, COST, double)
+	MPXJPP_FIELD_GETTER_SETTER(baselineCost, double, BASELINE_COST, double)
+	MPXJPP_FIELD_GETTER_SETTER(actualCost, double, ACTUAL_COST, double)
+
+	MPXJPP_FIELD_SETTER(start, Date, START, Date)
+	MPXJPP_FIELD_SETTER(finish, Date, FINISH, Date)
+	Date start() const;
+	Date finish() const;
+
+	MPXJPP_FIELD_GETTER_SETTER(delay, Duration, ASSIGNMENT_DELAY, Duration)
+	MPXJPP_FIELD_GETTER_SETTER(resourceUniqueID, int, RESOURCE_UNIQUE_ID, int)
+	MPXJPP_FIELD_GETTER_SETTER(workContour, WorkContour, WORK_CONTOUR, int)
+	MPXJPP_FIELD_GETTER_SETTER(remainingWork, Duration, REMAINING_WORK, Duration)
+	MPXJPP_FIELD_GETTER_SETTER(levelingDelay, Duration, LEVELING_DELAY, Duration)
+
+#undef FIELDTYPE_CLASS
 };
 
 }

@@ -184,7 +184,7 @@ int GraphicalIndicator::evaluate(FieldContainer *container) {
 	const CriteriaList *criteria = nullptr;
 
 	if (Task *task = dynamic_cast<Task *>(container)) {
-		if (task->getUniqueID() == 0) {
+		if (task->uniqueID() == 0) {
 			if (!m_projectSummaryInheritsFromSummaryRows)
 				criteria = &m_projectSummaryCriteria;
 			else if (!m_summaryRowsInheritFromNonSummaryRows)
@@ -192,13 +192,12 @@ int GraphicalIndicator::evaluate(FieldContainer *container) {
 			else
 				criteria = &m_nonSummaryRowCriteria;
 		} else {
-			// TODO: uncomment
-//			if (!task->getSummary())
-//				criteria = &m_nonSummaryRowCriteria;
-//			else if (!m_summaryRowsInheritFromNonSummaryRows)
-//				criteria = &m_summaryRowCriteria;
-//			else
-//				criteria = &m_nonSummaryRowCriteria;
+			if (!task->getSummary())
+				criteria = &m_nonSummaryRowCriteria;
+			else if (!m_summaryRowsInheritFromNonSummaryRows)
+				criteria = &m_summaryRowCriteria;
+			else
+				criteria = &m_nonSummaryRowCriteria;
 		}
 	} else {
 		criteria = &m_nonSummaryRowCriteria;

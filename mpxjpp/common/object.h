@@ -1,6 +1,7 @@
 #ifndef OBJECT_H
 #define OBJECT_H
 
+#include <cmath>
 #include <memory>
 #include <exception>
 #include <vector>
@@ -65,6 +66,7 @@ namespace anyimpl {
 		virtual void* get_value(void** src) override { return reinterpret_cast<void*>(src); }
 		virtual int compareTo(void* const* x, void* const* y) override
 			{ return *(reinterpret_cast<T const*>(x)) - *(reinterpret_cast<T const*>(y)); }
+		static_assert(sizeof(T) <= sizeof(void *), "not appropriate for small_any_policy");
 	};
 
 	template<typename T>
@@ -116,6 +118,14 @@ namespace anyimpl {
 	SMALL_POLICY(unsigned long)
 	SMALL_POLICY(float)
 	SMALL_POLICY(bool)
+
+#if INTPTR_MAX == INT64_MAX
+	SMALL_POLICY(long long)
+	SMALL_POLICY(unsigned long long)
+#ifdef __STDC_IEC_559__
+	SMALL_POLICY(double)
+#endif
+#endif
 
 	#undef SMALL_POLICY
 

@@ -77,7 +77,7 @@ public:
 //	virtual std::string name(Locale &locale) const = 0;
 };
 
-static_assert(std::is_polymorphic<FieldType>::value == false, "FieldType has vtable!");
+static_assert(std::is_polymorphic<FieldType>::value == false, "FieldType shouldn't have vtable!");
 
 namespace common {
 namespace anyimpl {

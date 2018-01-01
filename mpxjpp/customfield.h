@@ -78,7 +78,9 @@ private:
 public:
 	CustomField &getCustomField(FieldType field);
 	CustomFieldValueItem *getCustomFieldValueItemByUniqueID(int uniqueID);
-	void registerValue(CustomFieldValueItem *item);
+	void registerValue(CustomFieldValueItem *item) {
+		m_valueMap.push_back(item);
+	}
 	void deregisterValue(const CustomFieldValueItem *item);
 	void registerAlias(FieldType type, const std::string &alias);
 	FieldType getFieldByAlias(FieldTypeClass typeClass, const std::string &alias);

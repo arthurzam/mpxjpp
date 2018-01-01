@@ -101,7 +101,7 @@ struct ProjectField final : public FieldType {
 	F(NEW_TASK_START_IS_PROJECT_START, DataType::BOOLEAN),\
 	F(WEEK_START_DAY, DataType::DAY),\
 	F(CALCULATE_MULTIPLE_CRITICAL_PATHS, DataType::BOOLEAN),\
-	F(CUSTOM_PROPERTIES, DataType::MAP),\
+	/*F(CUSTOM_PROPERTIES, DataType::MAP),*/\
 	F(CURRENCY_CODE, DataType::STRING),\
 	F(SHOW_PROJECT_SUMMARY_TASK, DataType::BOOLEAN),\
 	F(BASELINE_DATE, DataType::DATE),\
@@ -117,7 +117,7 @@ struct ProjectField final : public FieldType {
 	F(BASELINE10_DATE, DataType::DATE),\
 	F(TEMPLATE, DataType::STRING),\
 	F(LAST_AUTHOR, DataType::STRING),\
-	F(LASTPRINTED, DataType::DATE),\
+	F(LAST_PRINTED, DataType::DATE),\
 	F(SHORT_APPLICATION_NAME, DataType::STRING),\
 	F(EDITING_TIME, DataType::INTEGER),\
 	F(PRESENTATION_FORMAT, DataType::STRING),\

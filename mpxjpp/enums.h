@@ -88,6 +88,17 @@ enum class ScheduleFrom {
 	FINISH = 1
 };
 
+enum class TaskMode {
+	MANUALLY_SCHEDULED = 0,
+	AUTO_SCHEDULED = 1
+};
+
+enum class TaskType {
+	FIXED_UNITS = 0,
+	FIXED_DURATION = 1,
+	FIXED_WORK = 2
+};
+
 enum class WorkContour {
 	FLAT = 0,
 	BACK_LOADED = 1,

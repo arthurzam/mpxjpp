@@ -33,14 +33,14 @@ class ProjectEntityWithUniqueID {
 		 *
 		 * @return Unique ID value
 		 */
-		virtual int getUniqueID() = 0;
+		virtual int uniqueID() = 0;
 
 		/**
 		 * Set the Unique ID value of the entity.
 		 *
 		 * @param id Unique ID value
 		 */
-		virtual void setUniqueID(int id) = 0;
+		virtual void set_uniqueID(int id) = 0;
 };
 
 /**

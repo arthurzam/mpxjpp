@@ -4,7 +4,9 @@
 using namespace mpxjpp;
 
 Duration Duration::convertUnits(double duration, TimeUnit fromUnits, TimeUnit toUnits, ProjectProperties &defaults) {
-	// return (convertUnits(duration, fromUnits, toUnits, defaults.getMinutesPerDay().doubleValue(), defaults.getMinutesPerWeek().doubleValue(), defaults.getDaysPerMonth().doubleValue()));
+	return (convertUnits(duration, fromUnits, toUnits,
+						 defaults.minutesPerDay(), defaults.minutesPerWeek(),
+						 defaults.daysPerMonth()));
 }
 
 Duration Duration::add(Duration a, Duration b, ProjectProperties &defaults) {

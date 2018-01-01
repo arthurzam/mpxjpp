@@ -32,10 +32,6 @@ CustomFieldValueItem *CustomFieldContainer::getCustomFieldValueItemByUniqueID(in
 	return nullptr;
 }
 
-void CustomFieldContainer::registerValue(CustomFieldValueItem *item) {
-	m_valueMap.push_back(item);
-}
-
 void CustomFieldContainer::deregisterValue(const CustomFieldValueItem *item) {
 	auto it = std::find(m_valueMap.begin(), m_valueMap.end(), item);
 	if (it != m_valueMap.end())
