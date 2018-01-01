@@ -8,6 +8,8 @@
 #include "projectfield.h"
 #include "rate.h"
 
+#include "common/calendar.h"
+
 #include <ctime>
 namespace mpxjpp {
 
@@ -94,7 +96,7 @@ public:
 	MPXJPP_FIELD_GETTER_SETTER(baselineCost, double, ProjectField::BASELINE_COST, double)
 	MPXJPP_FIELD_GETTER_SETTER(actualCost, double, ProjectField::ACTUAL_COST, double)
 	MPXJPP_FIELD_GETTER_SETTER_NO_SET_CAST(work, Duration, ProjectField::WORK, Duration)
-	MPXJPP_FIELD_GETTER_SETTER_NO_SET_CAST(work2, Duration, ProjectField::WORK2, Duration)
+	MPXJPP_FIELD_GETTER_SETTER_NO_SET_CAST(work2, double, ProjectField::WORK2, double)
 	MPXJPP_FIELD_GETTER_SETTER_NO_SET_CAST(baselineWork, Duration, ProjectField::BASELINE_WORK, Duration)
 	MPXJPP_FIELD_GETTER_SETTER_NO_SET_CAST(actualWork, Duration, ProjectField::ACTUAL_WORK, Duration)
 	MPXJPP_FIELD_GETTER_SETTER_NO_SET_CAST(duration, Duration, ProjectField::DURATION, Duration)

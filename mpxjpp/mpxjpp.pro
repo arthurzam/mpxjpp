@@ -28,7 +28,6 @@ HEADERS += \
     group.h \
     mpxjpp-gens.h \
     projectconfig.h \
-    datatype.h \
     timeunit.h \
     rate.h \
     column.h \
