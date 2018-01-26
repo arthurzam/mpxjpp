@@ -144,7 +144,7 @@ private:
 	unsigned char m_projectSummaryInheritsFromSummaryRows:1;
 	unsigned char m_showDataValuesInToolTips:1;
 public:
-	int evaluate(FieldContainer *container);
+	int evaluate(FieldContainer &container);
 
 	MPXJPP_GETTER_SETTER(fieldType, FieldType)
 	MPXJPP_GETTER_SETTER(displayGraphicalIndicators, bool)

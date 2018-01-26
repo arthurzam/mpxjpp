@@ -182,10 +182,12 @@ int GraphicalIndicatorCriteria::evaluate(FieldContainer &container) {
 	return GenericCriteria::evaluate(container, {}) ? m_indicator : -1;
 }
 
-int GraphicalIndicator::evaluate(FieldContainer *container) {
+int GraphicalIndicator::evaluate(FieldContainer &container) {
 	const CriteriaList *criteria = nullptr;
-	if (Task *task = dynamic_cast<Task *>(container)) {
-		if (task->uniqueID() == 0) {
+	static_assert(std::is_final<Task>::value, "For this part we need Task class as final");
+	if (typeid(container) == typeid(Task)) {
+		Task &task = static_cast<Task &>(container);
+		if (task.uniqueID() == 0) {
 			if (!m_projectSummaryInheritsFromSummaryRows)
 				criteria = &m_projectSummaryCriteria;
 			else if (!m_summaryRowsInheritFromNonSummaryRows)
@@ -193,7 +195,7 @@ int GraphicalIndicator::evaluate(FieldContainer *container) {
 			else
 				criteria = &m_nonSummaryRowCriteria;
 		} else {
-			if (!task->summary())
+			if (!task.summary())
 				criteria = &m_nonSummaryRowCriteria;
 			else if (!m_summaryRowsInheritFromNonSummaryRows)
 				criteria = &m_summaryRowCriteria;
@@ -206,20 +208,21 @@ int GraphicalIndicator::evaluate(FieldContainer *container) {
 
 	int result;
 	for (const auto &gic : *criteria)
-		if ((result = gic->evaluate(*container)) != -1)
+		if ((result = gic->evaluate(container)) != -1)
 			return result;
 	return 0;
 }
 
-bool Filter::evaluate(FieldContainer *container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const {
+bool Filter::evaluate(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const {
 	if (!m_criteria)
 		return true; // CHECK: maybe false - error in upstream
-	if (m_criteria->evaluate(*container, promptValues))
+	if (m_criteria->evaluate(container, promptValues))
 		return true;
+	static_assert(std::is_final<Task>::value, "For this part we need Task class as final");
 	if (m_showRelatedSummaryRows)
-		if (Task *task = dynamic_cast<Task *>(container))
-			for (const TaskPtr &t : task->childTasks())
-				if (Filter::evaluate(t.get(), promptValues))
+		if (typeid(container) == typeid(Task))
+			for (const TaskPtr &t : static_cast<Task &>(container).childTasks())
+				if (Filter::evaluate(*t, promptValues))
 					return true;
 	return true; // CHECK: maybe false - error in upstream
 }

@@ -33,7 +33,7 @@ public:
 		m_criteria = std::move(criteria);
 	}
 
-	bool evaluate(FieldContainer *container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const;
+	bool evaluate(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const;
 };
 
 class FilterContainer final {
