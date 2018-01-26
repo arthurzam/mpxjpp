@@ -52,7 +52,7 @@ class TableContainer final : public ListWithCallbacks<Table> {
 
 	protected:
 		virtual void added(int index) override {
-			const Table &table = m_list[index];
+			const Table &table = (*this)[index];
 			getIndex(table).insert({table.name(), index});
 		}
 		virtual void removed(const Table &val) override {
@@ -67,7 +67,7 @@ class TableContainer final : public ListWithCallbacks<Table> {
 		 * @return table instance
 		 */
 		Table &getTaskTableByName(const std::string &name) {
-			return m_list[m_taskTablesByName[name]];
+			return (*this)[m_taskTablesByName[name]];
 		}
 
 		/**
@@ -78,7 +78,7 @@ class TableContainer final : public ListWithCallbacks<Table> {
 		 * @return table instance
 		 */
 		Table &getResourceTableByName(const std::string &name) {
-			return m_list[m_resourceTablesByName[name]];
+			return (*this)[m_resourceTablesByName[name]];
 		}
 };
 

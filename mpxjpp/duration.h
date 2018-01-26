@@ -10,9 +10,10 @@ class ProjectProperties;
 
 class Duration final {
 	private:
-		double m_duration;
-		TimeUnit m_units;
+		double m_duration = 0;
+		TimeUnit m_units = TimeUnit::MINUTES;
 	public:
+		constexpr Duration() = default;
 		constexpr Duration(double duration, TimeUnit type)
 			: m_duration(duration), m_units(type)
 		{}

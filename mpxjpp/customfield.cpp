@@ -5,7 +5,7 @@
 using namespace mpxjpp;
 
 void CustomFieldLookupTable::added(int index) {
-	m_parent.registerValue(&m_list[index]);
+	m_parent.registerValue(&(*this)[index]);
 }
 
 void CustomFieldLookupTable::removed(const CustomFieldValueItem &item) {

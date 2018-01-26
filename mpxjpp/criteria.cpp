@@ -4,6 +4,8 @@
 
 #include "common/strutils.h"
 
+#include <typeinfo>
+
 using namespace mpxjpp;
 
 namespace {
@@ -182,7 +184,6 @@ int GraphicalIndicatorCriteria::evaluate(FieldContainer &container) {
 
 int GraphicalIndicator::evaluate(FieldContainer *container) {
 	const CriteriaList *criteria = nullptr;
-
 	if (Task *task = dynamic_cast<Task *>(container)) {
 		if (task->uniqueID() == 0) {
 			if (!m_projectSummaryInheritsFromSummaryRows)
@@ -217,7 +218,7 @@ bool Filter::evaluate(FieldContainer *container, std::unordered_map<GenericCrite
 		return true;
 	if (m_showRelatedSummaryRows)
 		if (Task *task = dynamic_cast<Task *>(container))
-			for (const TaskPtr &t : task->getChildTasks())
+			for (const TaskPtr &t : task->childTasks())
 				if (Filter::evaluate(t.get(), promptValues))
 					return true;
 	return true; // CHECK: maybe false - error in upstream
@@ -263,5 +264,4 @@ Filter *FilterContainer::getFilterByID(int id) const {
 		if (filter->id() == id)
 			return filter.get();
 	return nullptr;
-
 }

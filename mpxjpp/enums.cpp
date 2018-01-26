@@ -1,12 +1,14 @@
 #include "enums.h"
 #include "view.h"
 #include "timeunit.h"
+#include "relation.h"
 
 #include "fieldtype.h"
 #include "availability.h"
 #include "listwithcallbacks.h"
 
 constexpr const char *mpxjpp::TimeUnit::strs[];
+constexpr const char *mpxjpp::RelationType::strs[];
 
 
 namespace std {

@@ -10,8 +10,9 @@
 namespace mpxjpp {
 
 class DateRange final {
+	using Date = common::DateTime;
 private:
-	std::time_t m_start = 0, m_end = 0;
+	Date m_start = Date::zero(), m_end = Date::zero();
 public:
 	constexpr DateRange() = default;
 
@@ -21,16 +22,12 @@ public:
 	 * @param startDate start date
 	 * @param endDate end date
 	 */
-	constexpr DateRange(std::time_t start, std::time_t end) :
+	constexpr DateRange(Date start, Date end) :
 		m_start(start), m_end(end)
 	{ }
 
-	constexpr DateRange(common::Time start, common::Time end) :
-		m_start(static_cast<std::time_t>(start)), m_end(static_cast<std::time_t>(end))
-	{ }
-
-	constexpr MPXJPP_GETTER(start, std::time_t)
-	constexpr MPXJPP_GETTER(end, std::time_t)
+	constexpr MPXJPP_GETTER(start, Date)
+	constexpr MPXJPP_GETTER(end, Date)
 
 	/**
 	 * This method compares a target date with a date range. The method will
@@ -41,7 +38,7 @@ public:
 	 * @param date target date
 	 * @return comparison result
 	 */
-	constexpr int compareTo(std::time_t date) {
+	constexpr int compareTo(Date date) {
 		if (date < m_start)
 			return -1;
 		if (date < m_end)
@@ -50,23 +47,19 @@ public:
 	}
 
 	constexpr int compareTo(const DateRange &other) {
-		int result = other.m_start - this->m_start;
+		int result = (m_start - other.m_start).count();
 		if (result == 0)
-			result = other.m_end - this->m_end;
+			result = (m_end - other.m_end).count();
 		return result;
 	}
 
-	constexpr bool operator <(const DateRange &other) {
-		return compareTo(other) < 0;
-	}
+//	bool operator <(const DateRange &other) {
+//		return compareTo(other) < 0;
+//	}
 
-	constexpr bool operator ==(const DateRange &other) {
-		return compareTo(other) == 0;
-	}
-
-	static constexpr DateRange EMPTY_RANGE() {
-		return {0, 0};
-	}
+//	bool operator ==(const DateRange &other) {
+//		return compareTo(other) == 0;
+//	}
 };
 
 }
@@ -76,9 +69,9 @@ namespace std {
 template<>
 struct hash<mpxjpp::DateRange> {
 	constexpr size_t operator()(const mpxjpp::DateRange &val) const {
-		const std::time_t start = val.start();
-		const std::time_t end = val.end();
-		return static_cast<size_t>(((int) start ^ (int) (start >> 32)) ^ ((int) end ^ (int) (end >> 32)));
+		auto start = val.start().count();
+		auto end = val.end().count();
+		return (static_cast<size_t>(start) * 2654435761U) ^ end;
 	}
 };
 

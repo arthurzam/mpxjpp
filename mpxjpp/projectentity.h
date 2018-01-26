@@ -117,7 +117,7 @@ public:
 		if (!this->empty()) {
 			std::sort(this->begin(), this->end(),
 					  [] (const std::shared_ptr<T> &a, const std::shared_ptr<T> &b) { return *a < *b; });
-			int id = this->m_list.front()->id();
+			int id = this->front()->id();
 			if (id != 0)
 				id = 1;
 			for (auto &entity : *this)

@@ -9,9 +9,10 @@
 namespace mpxjpp {
 class Rate final {
 	private:
-		double m_amount;
-		TimeUnit m_units;
+		double m_amount = 0;
+		TimeUnit m_units = TimeUnit::MINUTES;
 	public:
+		constexpr Rate() = default;
 		constexpr Rate(double amount, TimeUnit time) :
 			m_amount(amount), m_units(time)
 		{}

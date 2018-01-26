@@ -65,6 +65,8 @@ enum class DataType {
 };
 
 struct FieldType {
+	friend class FieldContainer;
+//	friend class common::anyimpl::compare_to<FieldType>;
 protected:
 	struct priv_field_t {
 		DataType m_dataType;
@@ -118,20 +120,10 @@ public:
 	// CHECK: is needed?
 //	virtual std::string name() const = 0;
 //	virtual std::string name(Locale &locale) const = 0;
+
 };
 
 static_assert(std::is_polymorphic<FieldType>::value == false, "FieldType shouldn't have vtable!");
-
-namespace common {
-namespace anyimpl {
-template<>
-struct compare_to_func<FieldType> {
-	int operator()(const FieldType &a, const FieldType &b) {
-		return a.value() - b.value();
-	}
-};
-}
-}
 
 /**
  * This interface is implemented by the Task and Resource classes. It
@@ -139,15 +131,16 @@ struct compare_to_func<FieldType> {
  * using their identifiers.
  */
 class FieldContainer {
+	/** TODO: vector<bool> optimization
+	  *
+	  * as all FieldType uses aren't using the value, we can extract all the booleans to an vector<bool>
+	  * for better storage usement.
+	  */
 private:
 	common::any *m_array;
 protected:
 	FieldContainer(int size) {
 		m_array = new common::any[size];
-	}
-public:
-	virtual ~FieldContainer() {
-		delete[] m_array;
 	}
 
 	/**
@@ -156,8 +149,13 @@ public:
 	 * @param field field identifier
 	 * @param value field value
 	 */
-	virtual void set(const FieldType &field, common::any value) {
-		m_array[field.value()] = value;
+	template <typename T>
+	void set(const FieldType &field, T value) {
+		common::any_type_cast<T>::set(m_array[field.m_value], value);
+	}
+public:
+	virtual ~FieldContainer() {
+		delete[] m_array;
 	}
 
 	/**
@@ -168,7 +166,7 @@ public:
 	 * @return field value
 	 */
 	common::any &getCachedValue(const FieldType &field) const {
-		return m_array[field.value()];
+		return m_array[field.m_value];
 	}
 
 	/**
@@ -190,23 +188,19 @@ public:
 // those MACROs are used for generating getter/setter in FieldContainer
 // You should define FIELDTYPE_CLASS prior to using those
 
-#define MPXJPP_FIELD_GETTER(varName, type, field, castType) \
+#define MPXJPP_FIELD_GETTER(varName, type, field) \
 	type varName() const { \
-		return static_cast<type>(getCachedValue(FIELDTYPE_CLASS(FIELDTYPE_CLASS::field)).cast<castType>()); \
+		return common::any_type_cast<type>::get(getCachedValue(FIELDTYPE_CLASS(FIELDTYPE_CLASS::field)), {}); \
 	}
 
-#define MPXJPP_FIELD_SETTER(varName, type, field, castType) \
+#define MPXJPP_FIELD_SETTER(varName, type, field) \
 	void set_##varName(type varName) { \
-		set(FIELDTYPE_CLASS(FIELDTYPE_CLASS::field), static_cast<castType>(varName)); \
+		set<type>(FIELDTYPE_CLASS(FIELDTYPE_CLASS::field), varName); \
 	}
 
-#define MPXJPP_FIELD_GETTER_SETTER(varName, type, field, castType) \
-	MPXJPP_FIELD_GETTER(varName, type, field, castType) \
-	MPXJPP_FIELD_SETTER(varName, type, field, castType)
-
-#define MPXJPP_FIELD_GETTER_SETTER_NO_SET_CAST(varName, type, field, castType) \
-	MPXJPP_FIELD_GETTER(varName, type, field, castType) \
-	MPXJPP_FIELD_SETTER(varName, type, field, type)
+#define MPXJPP_FIELD_GETTER_SETTER(varName, type, field) \
+	MPXJPP_FIELD_GETTER(varName, type, field) \
+	MPXJPP_FIELD_SETTER(varName, type, field)
 
 }
 

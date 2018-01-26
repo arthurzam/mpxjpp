@@ -40,7 +40,7 @@ ProjectProperties::ProjectProperties(ProjectFile &mpx) :
 
 	set_dateOrder(DateOrder::DMY);
 	set_timeFormat(ProjectTimeFormat::TWELVE_HOUR);
-	set_defaultStartTime(static_cast<int>(common::Time{0, 0, 8}));
+	set_defaultStartTime(common::hours(8));
 	set_dateSeparator(DEFAULT_DATE_SEPARATOR);
 	set_timeSeparator(DEFAULT_TIME_SEPARATOR);
 	set_amText("am");
@@ -112,7 +112,7 @@ ProjectProperties::ProjectProperties(ProjectFile &mpx) :
 
 void ProjectProperties::set_defaultCalendarName(const std::string &calendarName) {
 	set(ProjectField(ProjectField::DEFAULT_CALENDAR_NAME),
-		std::move(!calendarName.empty() ? common::any(calendarName) : common::any(DEFAULT_CALENDAR_NAME)));
+		std::move(!calendarName.empty() ? calendarName : DEFAULT_CALENDAR_NAME));
 }
 
 void ProjectProperties::set_currencySymbol(const std::string &currencySymbol) {

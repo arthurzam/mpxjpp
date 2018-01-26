@@ -2,6 +2,7 @@
 #define TIMEUNIT_H
 
 #include <string>
+#include "common/object.h"
 
 namespace mpxjpp {
 
@@ -38,7 +39,7 @@ private:
 		"ey",
 		"e%"
 	};
-	int m_value;
+	unsigned m_value;
 
 public:
 	constexpr TimeUnit(int type) :
@@ -60,6 +61,22 @@ public:
 		return other.m_value != m_value;
 	}
 };
+
+namespace common {
+template<>
+struct any_type_cast<TimeUnit> {
+	using type = TimeUnit;
+	using castType = int;
+
+	static type get(const any &a, castType def) {
+		return static_cast<type>(a.cast<castType>(def));
+	}
+
+	static void set(any &a, type var) {
+		a.assign<castType>(static_cast<castType>(var));
+	}
+};
+}
 
 }
 

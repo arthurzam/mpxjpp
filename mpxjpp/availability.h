@@ -5,6 +5,7 @@
 
 #include "mpxjpp-gens.h"
 #include "daterange.h"
+#include "common/calendar.h"
 
 namespace mpxjpp {
 
@@ -13,7 +14,7 @@ class Availability final {
 		DateRange m_range;
 		double m_units;
 	public:
-		constexpr Availability(std::time_t startDate, std::time_t endDate, double units) :
+		constexpr Availability(common::Time startDate, common::Time endDate, double units) :
 			m_range(startDate, endDate), m_units(units)
 		{}
 
@@ -30,7 +31,7 @@ class Availability final {
 
 class AvailabilityTable final : public std::vector<Availability> {
 	public:
-		Availability *getEntryByDate(std::time_t date) {
+		Availability *getEntryByDate(common::DateTime date) {
 			for (auto &entry : *this) {
 				const int c = entry.range().compareTo(date);
 				if (c == 0)

@@ -4,6 +4,7 @@
 #include <ctime>
 #include <vector>
 
+#include "common/calendar.h"
 #include "duration.h"
 #include "mpxjpp-gens.h"
 
@@ -14,22 +15,22 @@ class ProjectCalendar;
 template <typename T>
 class TimephasedItem {
 	private:
-		std::time_t m_start;
+		common::DateTime m_start;
 		T m_totalAmount;
-		std::time_t m_finish;
+		common::DateTime m_finish;
 		T m_amountPerDay;
 		bool m_modified;
 	public:
 		TimephasedItem() = default;
 		TimephasedItem(const TimephasedItem &) = default;
-		TimephasedItem(std::time_t start, std::time_t finish, bool modified, T totalAmount, T amountPerDay)
+		TimephasedItem(common::DateTime start, common::DateTime finish, bool modified, T totalAmount, T amountPerDay)
 			: m_start(start), m_totalAmount(totalAmount), m_finish(finish),
 			  m_amountPerDay(amountPerDay), m_modified(modified)
 		{}
 
-		MPXJPP_GETTER_SETTER(start, std::time_t)
+		MPXJPP_GETTER_SETTER(start, common::DateTime)
 		MPXJPP_GETTER_SETTER(totalAmount, T)
-		MPXJPP_GETTER_SETTER(finish, std::time_t)
+		MPXJPP_GETTER_SETTER(finish, common::DateTime)
 		MPXJPP_GETTER_SETTER(amountPerDay, T)
 		MPXJPP_GETTER_SETTER(modified, bool)
 

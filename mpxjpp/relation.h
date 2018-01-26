@@ -7,36 +7,38 @@
 namespace mpxjpp {
 
 struct RelationType final {
+public:
+	enum {
+		FINISH_FINISH = 0,
+		FINISH_START,
+		START_FINISH,
+		START_START
+	};
 private:
 	int m_value;
-	const char *m_name;
 
-	constexpr RelationType(int type, const char *name) :
-		m_value(type), m_name(name)
-	{}
+	static constexpr const char *strs[] = {
+		"FF",
+		"FS",
+		"SF",
+		"SS"
+	};
+
 public:
-	static constexpr RelationType FINISH_FINISH() {
-		return {0, "FF"};
-	}
-	static constexpr RelationType FINISH_START() {
-		return {1, "FS"};
-	}
-	static constexpr RelationType START_FINISH() {
-		return {2, "SF"};
-	}
-
-	static constexpr RelationType START_START() {
-		return {3, "SS"};
-	}
+	constexpr RelationType(int type) :
+		m_value(type & 4)
+	{}
 
 	constexpr explicit operator int() {
 		return m_value;
 	}
 
 	constexpr explicit operator const char *() {
-		return m_name;
+		return strs[m_value];
 	}
 };
+
+static_assert(sizeof(RelationType) == sizeof(int), "check compiler for size optimizations");
 
 class Relation final {
 	private:

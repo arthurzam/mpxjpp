@@ -28,18 +28,11 @@ public:
 	bool operator ==(const GenericCriteriaPrompt &other) const {
 		return m_type == other.m_type && m_prompt == other.m_prompt;
 	}
-};
 
-namespace common {
-namespace anyimpl {
-template<>
-struct compare_to_func<GenericCriteriaPrompt> {
-	int operator()(const GenericCriteriaPrompt &a, const GenericCriteriaPrompt &b) {
-		return static_cast<int>(a.type()) - static_cast<int>(b.type());
+	int compareTo(const GenericCriteriaPrompt &b) const {
+		return static_cast<int>(this->m_type) - static_cast<int>(b.m_type);
 	}
 };
-}
-}
 }
 
 namespace std {
@@ -54,7 +47,7 @@ struct hash<mpxjpp::GenericCriteriaPrompt> {
 namespace mpxjpp {
 struct TestOperator final {
 public:
-	enum {
+	enum : int {
 		IS_ANY_VALUE,
 		IS_WITHIN,
 		IS_GREATER_THAN,

@@ -4,6 +4,8 @@ CONFIG -= app_bundle
 
 QT       += core
 
+INCLUDEPATH += ../
+
 SOURCES += main.cpp \
     mpp/criteriareader.cpp \
     group.cpp \
@@ -12,13 +14,13 @@ SOURCES += main.cpp \
     recurringdata.cpp \
     fieldtype.cpp \
     projectcalendar.cpp \
-    common/calendar.cpp \
     resourceassignment.cpp \
     criteria.cpp \
     duration.cpp \
     projectproperties.cpp \
     customfield.cpp \
-    projectfile.cpp
+    projectfile.cpp \
+    task.cpp
 
 HEADERS += \
     daterange.h \
@@ -63,5 +65,6 @@ HEADERS += \
     common/uuid.h \
     projectfile.h
 
+QMAKE_CXXFLAGS_RELEASE += -Wpedantic -Wextra
 #QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin
 #QMAKE_LFLAGS_RELEASE += -flto -fuse-linker-plugin

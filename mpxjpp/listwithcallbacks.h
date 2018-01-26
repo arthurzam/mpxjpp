@@ -6,96 +6,63 @@
 namespace mpxjpp {
 
 template <typename T>
-class ListWithCallbacks {
-	protected:
-		std::vector<T> m_list;
-		virtual void added(int) { }
-		virtual void removed(const T &) { }
-		virtual void replaced(const T &, const T &) { }
-	public:
-		ListWithCallbacks()
-			: m_list()
-		{}
+class ListWithCallbacks : private std::vector<T> {
+protected:
+	virtual void added(int) { }
+	virtual void removed(const T &) { }
+	virtual void replaced(const T &, const T &) { }
+public:
+	using ListWithCallbacks::vector::vector;
+	using ListWithCallbacks::vector::reserve;
+	using ListWithCallbacks::vector::resize;
+	using ListWithCallbacks::vector::clear;
 
-		void reserve(size_t n) {
-			m_list.reserve(n);
-		}
+	using ListWithCallbacks::vector::size;
+	using ListWithCallbacks::vector::empty;
+	using ListWithCallbacks::vector::begin;
+	using ListWithCallbacks::vector::end;
+	using ListWithCallbacks::vector::cbegin;
+	using ListWithCallbacks::vector::cend;
 
-		void resize(size_t n) {
-			m_list.resize(n);
-		}
+	using ListWithCallbacks::vector::at;
+	using ListWithCallbacks::vector::front;
+	using ListWithCallbacks::vector::back;
+	using ListWithCallbacks::vector::operator [];
 
-		void add(const T &val) {
-			m_list.push_back(val);
-			added(m_list.size() - 1);
-		}
+	void add(const T &val) {
+		this->push_back(val);
+		added(size() - 1);
+	}
 
-		void add(T &&val) {
-			m_list.push_back(std::move(val));
-			added(m_list.back());
-		}
+	void add(T &&val) {
+		this->push_back(std::move(val));
+		added(size() - 1);
+	}
 
-		void add(const T &val, int index) {
-			m_list.insert(m_list.begin() + index, val);
-			added(val);
-		}
+	void add(const T &val, int index) {
+		this->insert(begin() + index, val);
+		added(index);
+	}
 
-		void add(T &&val, int index) {
-			m_list.insert(m_list.begin() + index, std::move(val));
-			added(*(m_list.begin() + index));
-		}
+	void add(T &&val, int index) {
+		this->insert(begin() + index, std::move(val));
+		added(index);
+	}
 
-		const T &operator [](int index) const {
-			return m_list[index];
-		}
+	T&& set(int index, const T &element) {
+		T &ref(this->at(index));
+		T removed(ref);
+		ref = element;
+		replaced(removed, element);
+		return std::move(removed);
+	}
 
-		void clear() {
-			m_list.clear();
-		}
-
-		T&& set(int index, const T &element) {
-			T &ref = m_list[index];
-			T removed(ref);
-			ref = element;
-			replaced(removed, element);
-			return std::move(removed);
-		}
-
-		T&& remove(int index) {
-			T removed = m_list[index];
-			m_list.erase(m_list.begin() + index);
-			return std::move(removed);
-		}
-
-		bool empty() const {
-			return m_list.empty();
-		}
-
-		auto begin() {
-			return m_list.begin();
-		}
-
-		auto end() {
-			return m_list.end();
-		}
-
-		auto cbegin() const {
-			return m_list.cbegin();
-		}
-
-		auto cend() const {
-			return m_list.cend();
-		}
-
-		auto begin() const {
-			return m_list.cbegin();
-		}
-
-		auto end() const {
-			return m_list.cend();
-		}
-
-		// TODO: work on it
+	T&& remove(int index) {
+		T obj(this->at(index));
+		this->erase(begin() + index);
+		removed(obj);
+		return std::move(obj);
+	}
 };
 
 }

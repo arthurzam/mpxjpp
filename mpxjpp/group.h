@@ -67,7 +67,7 @@ class GroupContainer final : public ListWithCallbacks<Group> {
 		std::map<std::string, int> m_groupsByName;
 	protected:
 		virtual void added(int index) override {
-			m_groupsByName.insert({m_list[index].name(), index});
+			m_groupsByName.insert({(*this)[index].name(), index});
 		}
 		virtual void removed(const Group &val) override {
 			m_groupsByName.erase(val.name());
@@ -80,7 +80,7 @@ class GroupContainer final : public ListWithCallbacks<Group> {
 		 * @return Group instance
 		 */
 		Group &getByName(const std::string &name) {
-			return m_list[m_groupsByName[name]];
+			return (*this)[m_groupsByName[name]];
 		}
 };
 

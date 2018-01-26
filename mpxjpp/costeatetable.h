@@ -1,12 +1,11 @@
 #ifndef COSTEATETABLE_H
 #define COSTEATETABLE_H
 
-#include <ctime>
 #include <limits>
 #include <vector>
 
 #include "rate.h"
-
+#include "common/calendar.h"
 namespace mpxjpp {
 
 class CostRateTableEntry final {
@@ -16,12 +15,12 @@ class CostRateTableEntry final {
 		Rate m_overtimeRate = Rate(0, TimeUnit::HOURS);
 		TimeUnit m_overtimeRateFormat = TimeUnit::HOURS;
 		double m_costPerUse = 0;
-		std::time_t m_endDate = std::numeric_limits<std::time_t>::max();
+		common::DateTime m_endDate = common::DateTime::max();
 	public:
 		constexpr CostRateTableEntry() = default;
 		constexpr CostRateTableEntry(Rate standardRate, TimeUnit standardRateFormat,
 						   Rate overtimeRate, TimeUnit overtimeRateFormat,
-						   double costPerUse, std::time_t endDate) :
+						   double costPerUse, common::DateTime endDate) :
 			m_standardRate(standardRate), m_standardRateFormat(standardRateFormat),
 			m_overtimeRate(overtimeRate), m_overtimeRateFormat(overtimeRateFormat),
 			m_costPerUse(costPerUse), m_endDate(endDate)
@@ -32,7 +31,7 @@ class CostRateTableEntry final {
 		constexpr MPXJPP_GETTER(overtimeRate, Rate)
 		constexpr MPXJPP_GETTER(overtimeRateFormat, TimeUnit)
 		constexpr MPXJPP_GETTER(costPerUse, double)
-		constexpr MPXJPP_GETTER(endDate, std::time_t)
+		constexpr MPXJPP_GETTER(endDate, common::DateTime)
 
 		constexpr bool operator ==(const CostRateTableEntry &other) {
 			return m_endDate == other.m_endDate;
@@ -53,7 +52,7 @@ class CostRateTable final : public std::vector<CostRateTableEntry> {
 		 * @param date required date
 		 * @return cost rate table entry index
 		 */
-		int getIndexByDate(std::time_t date) {
+		int getIndexByDate(common::DateTime date) {
 			int index = 0;
 			for (const auto entry : *this) {
 				if (date < entry.endDate())
@@ -69,7 +68,7 @@ class CostRateTable final : public std::vector<CostRateTableEntry> {
 		 * @param date required date
 		 * @return cost rate table entry
 		 */
-		CostRateTableEntry *getEntryByDate(std::time_t date) {
+		CostRateTableEntry *getEntryByDate(common::DateTime date) {
 			int index = getIndexByDate(date);
 			return index != -1 ? &(this->at(index)) : nullptr;
 		}

@@ -13,6 +13,7 @@
 #include "mpxjpp-gens.h"
 #include "daterange.h"
 #include "enums.h"
+#include "duration.h"
 
 #include "common/calendar.h"
 
@@ -38,18 +39,18 @@ public:
 		if (n < size())
 			return *(this->_M_impl._M_start + n);
 		else
-			return DateRange::EMPTY_RANGE();
+			return DateRange();
 	}
 };
 
 class ProjectCalendarException final : public ProjectCalendarDateRanges { // CHECK: maybe private inheritance
 	friend class ProjectCalendar;
 private:
-	std::time_t m_fromDate, m_toDate;
+	common::DateTime m_fromDate, m_toDate;
 	std::string m_name;
 	RecurrenceType m_recurring;
 
-	ProjectCalendarException(std::time_t fromDate, std::time_t toDate) {
+	ProjectCalendarException(common::DateTime fromDate, common::DateTime toDate) {
 		// TODO: call needed functions
 	   m_fromDate = fromDate; // DateHelper.getDayStartDate(fromDate);
 	   m_toDate = toDate; // DateHelper.getDayEndDate(toDate);
@@ -57,8 +58,8 @@ private:
 public:
 	MPXJPP_GETTER_SETTER(name, const std::string &)
 	MPXJPP_GETTER_SETTER(recurring, RecurrenceType)
-	MPXJPP_GETTER(fromDate, std::time_t)
-	MPXJPP_GETTER(toDate, std::time_t)
+	MPXJPP_GETTER(fromDate, common::DateTime)
+	MPXJPP_GETTER(toDate, common::DateTime)
 
 	/**
 	 * Gets working status.
@@ -77,16 +78,12 @@ public:
 	 * @param date Date to be tested
 	 * @return Boolean value
 	 */
-	bool contains(std::time_t date) {
+	bool contains(common::DateTime date) {
 		return m_fromDate <= date && date <= m_toDate;
 	}
 
 	bool operator <(const ProjectCalendarException &o) {
 		return m_fromDate < o.m_fromDate;
-	}
-
-	int compareTo(const ProjectCalendarException &o) {
-		return m_fromDate - o.m_fromDate;
 	}
 };
 
@@ -100,6 +97,10 @@ public:
 	ProjectCalendarHours(ProjectCalendarWeek &parentCalendar) :
 		m_parentCalendar(parentCalendar)
 	{}
+	ProjectCalendarHours(const ProjectCalendarHours &) = delete;
+	ProjectCalendarHours(ProjectCalendarHours &&) = default;
+	ProjectCalendarHours &operator =(const ProjectCalendarHours &) = delete;
+	ProjectCalendarHours &operator =(ProjectCalendarHours &&) = default;
 
 	ProjectCalendarWeek &parentCalendar() {
 		return m_parentCalendar;
@@ -111,8 +112,8 @@ public:
 
 class ProjectCalendarWeek {
 public:
-	static constexpr DateRange DEFAULT_WORKING_MORNING   {common::Time{ 8, 0, 0}, common::Time{12, 0, 0}};
-	static constexpr DateRange DEFAULT_WORKING_AFTERNOON {common::Time{13, 0, 0}, common::Time{17, 0, 0}};
+	static constexpr DateRange DEFAULT_WORKING_MORNING   {common::hours( 8), common::hours(12)};
+	static constexpr DateRange DEFAULT_WORKING_AFTERNOON {common::hours(13), common::hours(17)};
 private:
 	std::string m_name;
 	DateRange m_dateRange;
@@ -150,7 +151,7 @@ public:
 	 *
 	 * @return calendar hours instance
 	 */
-	std::unique_ptr<ProjectCalendarHours> addCalendarHours() {
+	virtual std::unique_ptr<ProjectCalendarHours> addCalendarHours() {
 		return std::make_unique<ProjectCalendarHours>(*this);
 	}
 
@@ -234,7 +235,7 @@ public:
 	 *
 	 * @param hours calendar hours instance
 	 */
-	void attachHoursToDay(ProjectCalendarHours *hours) {
+	virtual void attachHoursToDay(ProjectCalendarHours *hours) {
 		if (&hours->parentCalendar() != this)
 			throw std::invalid_argument("bad ownship");
 		m_hours[static_cast<int>(hours->day()) - 1].reset(hours);
@@ -246,7 +247,7 @@ public:
 	 *
 	 * @param hours calendar hours instance
 	 */
-	void removeHoursFromDay(ProjectCalendarHours &hours) {
+	virtual void removeHoursFromDay(ProjectCalendarHours &hours) {
 		if (&hours.parentCalendar() != this)
 			throw std::invalid_argument("bad ownship");
 		m_hours[static_cast<int>(hours.day()) - 1].reset(nullptr);
@@ -290,11 +291,11 @@ private:
 	Resource *m_resource;
 	std::vector<std::unique_ptr<ProjectCalendar>> m_derivedCalendars;
 
-	std::map<DateRange, std::time_t> m_workingDateCache;
-	std::map<std::time_t, std::time_t> m_startTimeCache;
-	std::time_t m_getDateLastStartDate;
+	std::map<DateRange, common::DateTime> m_workingDateCache;
+	std::map<common::DateTime, common::DateTime> m_startTimeCache;
+	common::DateTime m_getDateLastStartDate;
 	double m_getDateLastRemainingMinutes;
-	std::time_t m_getDateLastResult;
+	common::DateTime m_getDateLastResult;
 
 	std::vector<std::unique_ptr<ProjectCalendarWeek>> m_workWeeks;
 
@@ -324,7 +325,7 @@ public:
 	}
 	MPXJPP_GETTER(workWeeks, const std::vector<std::unique_ptr<ProjectCalendarWeek>> &)
 
-	ProjectCalendarException *addCalendarException(std::time_t fromDate, std::time_t toDate);
+	ProjectCalendarException *addCalendarException(common::DateTime fromDate, common::DateTime toDate);
 	void clearCalendarExceptions() {
 		m_exceptions.clear();
 		m_expandedExceptions.clear();
@@ -336,10 +337,34 @@ public:
 		return m_exceptions;
 	}
 
+	std::unique_ptr<ProjectCalendarHours> addCalendarHours() override {
+		clearWorkingDateCache();
+		return ProjectCalendarWeek::addCalendarHours();
+	}
+
+	void attachHoursToDay(ProjectCalendarHours *hours) override {
+		clearWorkingDateCache();
+		return ProjectCalendarWeek::attachHoursToDay(hours);
+	}
+
+	void removeHoursFromDay(ProjectCalendarHours &hours) override {
+		clearWorkingDateCache();
+		return ProjectCalendarWeek::removeHoursFromDay(hours);
+	}
+
+	ProjectCalendar *parent() const {
+		return static_cast<ProjectCalendar *>(ProjectCalendarWeek::parent());
+	}
+	void set_parent(ProjectCalendar *calendar);
+
+	bool isWorkingDay(Day day) const;
+	Duration getDuration(common::DateTime startDate, common::DateTime endDate);
+
+
 	// TODO: more functions
 private:
 	void clearWorkingDateCache();
-	ProjectCalendarDateRanges *getRanges(std::time_t date, std::time_t cal, Day day);
+	ProjectCalendarDateRanges *getRanges(common::DateTime date, common::DateTime cal, Day day);
 	void sortExceptions();
 	void populateExpandedExceptions();
 	void sortWorkWeeks();

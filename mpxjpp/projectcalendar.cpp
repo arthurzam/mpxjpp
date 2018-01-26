@@ -29,13 +29,28 @@ const ProjectCalendarHours *ProjectCalendarWeek::hours(Day day) {
 ProjectCalendar::ProjectCalendar(ProjectFile &file) :
 	m_projectFile(file) {
 	if (m_projectFile.projectConfig().autoCalendarUniqueID() == true)
-	   set_uniqueID(m_projectFile.projectConfig().getNextCalendarUniqueID());
+		set_uniqueID(m_projectFile.projectConfig().getNextCalendarUniqueID());
+}
+
+void ProjectCalendar::set_parent(ProjectCalendar *calendar) {
+	if (calendar != this) {
+//		if (ProjectCalendarWeek *par = ProjectCalendarWeek::parent())
+//			static_cast<ProjectCalendar *>(par)->removeDerivedCalendar(this);
+//		ProjectCalendarWeek::set_parent(calendar);
+//		if (calendar != nullptr)
+//			calendar->addDerivedCalendar(this);
+//		clearWorkingDateCache();
+	}
+}
+
+bool ProjectCalendar::isWorkingDay(Day day) const {
+	// TODO:
 }
 
 void ProjectCalendar::clearWorkingDateCache() {
 	m_workingDateCache.clear();
 	m_startTimeCache.clear();
-	m_getDateLastResult = 0;
+	m_getDateLastResult = common::DateTime::zero();
 	for (auto &iter : m_derivedCalendars)
 		iter->clearWorkingDateCache();
 }
