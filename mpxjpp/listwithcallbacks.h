@@ -16,6 +16,7 @@ public:
     using ListWithCallbacks::vector::reserve;
     using ListWithCallbacks::vector::resize;
     using ListWithCallbacks::vector::clear;
+    using ListWithCallbacks::vector::shrink_to_fit;
 
     using ListWithCallbacks::vector::size;
     using ListWithCallbacks::vector::empty;
@@ -29,15 +30,27 @@ public:
     using ListWithCallbacks::vector::back;
     using ListWithCallbacks::vector::operator [];
 
-    void add(const T &val) {
-        this->push_back(val);
+    template <typename U>
+    void add(U &&val) {
+        this->push_back(std::forward<U>(val));
         added(size() - 1);
     }
 
-    void add(T &&val) {
-        this->push_back(std::move(val));
+    template<typename... Args>
+    void emplace_back(Args&&... args) {
+        this->emplace_back(std::forward<Args>(args)...);
         added(size() - 1);
     }
+
+//  void add(const T &val) {
+//      this->push_back(val);
+//      added(size() - 1);
+//  }
+
+//  void add(T &&val) {
+//      this->push_back(std::move(val));
+//      added(size() - 1);
+//  }
 
     void add(const T &val, int index) {
         this->insert(begin() + index, val);

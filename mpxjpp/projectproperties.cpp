@@ -54,8 +54,8 @@ ProjectProperties::ProjectProperties(ProjectFile &mpx) :
     set_defaultWorkUnits(TimeUnit::HOURS);
     set_minutesPerDay(480);
     set_minutesPerWeek(2400);
-    set_defaultStandardRate(Rate(10, TimeUnit::HOURS));
-    set_defaultOvertimeRate(Rate(15, TimeUnit::HOURS));
+    set_defaultStandardRate(Rate{10, TimeUnit::HOURS});
+    set_defaultOvertimeRate(Rate{15, TimeUnit::HOURS});
     set_updatingTaskStatusUpdatesResourceStatus(true);
     set_splitInProgressTasks(false);
 

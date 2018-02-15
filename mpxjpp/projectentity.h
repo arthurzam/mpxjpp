@@ -65,6 +65,7 @@ public:
 
 template <typename T>
 class ProjectEntityContainer : public ListWithCallbacks<std::shared_ptr<T>> {
+    static_assert(std::is_base_of<ProjectEntityWithUniqueID, T>::value, "T should derive from ProjectEntityWithUniqueID");
 protected:
     ProjectFile &m_mpx;
     std::map<int, std::shared_ptr<T>> m_uniqueIDMap;
@@ -106,6 +107,7 @@ public:
 
 template <typename T>
 class ProjectEntityWithIDContainer : public ProjectEntityContainer<T> {
+    static_assert(std::is_base_of<ProjectEntityWithID, T>::value, "T should derive from ProjectEntityWithID");
 protected:
     std::map<int, std::shared_ptr<T>> m_idMap;
 public:
@@ -125,7 +127,7 @@ public:
         }
     }
 
-    std::shared_ptr<T> getByID(int id) {
+    std::shared_ptr<T> getByID(int id) const {
         auto search = m_idMap.find(id);
         return (search == m_idMap.end() ? std::shared_ptr<T>() : search->second);
     }

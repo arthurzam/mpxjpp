@@ -10,21 +10,18 @@
 namespace mpxjpp {
 namespace common {
 
+struct any;
+
 struct bad_any_cast
 { };
 
 namespace anyimpl {
-
     /**
      * is_small type trait
      *
      * Checks if T is small. Enables stack memmory inside any object
      */
-    template<typename T, typename = void>
-    struct is_small : std::false_type { } ;
-
-    template <typename T>
-    struct is_small<T, std::enable_if_t<sizeof(T) <= sizeof(void *)>> : std::true_type { };
+    template <typename T> constexpr bool is_small = (sizeof(T) <= sizeof(void *));
 
     /**
      * compare_to type trait
@@ -47,8 +44,7 @@ namespace anyimpl {
         }
     };
 
-    template<>
-    struct compare_to<std::string> {
+    template<> struct compare_to<std::string> {
         static constexpr int type = 2;
         int operator()(const std::string &a, const std::string &b) const noexcept {
             return a.compare(b);
@@ -80,20 +76,17 @@ namespace anyimpl {
      * This flag enables the any object to memcpy the memmory of the object.
      */
     template<typename T, typename = void>
-    struct is_movable : std::false_type { } ;
+    constexpr bool is_movable = std::is_trivial<T>::value;
 
     template <typename T>
-    struct is_movable<T, std::enable_if_t<T::IS_MOVABLE>> : std::true_type { };
-
-    struct empty_any
-    { int compareTo(const empty_any &) const { return 0; } };
+    constexpr bool is_movable<T, std::enable_if_t<T::IS_MOVABLE>> = true;
 
     struct base_any_policy {
-        virtual void static_delete(void** x) = 0;
-        virtual void copy_from_value(void const* src, void** dest) = 0;
-        virtual void clone(void* const* src, void** dest) = 0;
-        virtual void* get_value(void** src) = 0;
-        virtual int compareTo(void* const* x, void* const* y) = 0;
+        virtual void static_delete(void** x) const = 0;
+        virtual void copy_from_value(void const* src, void** dest) const = 0;
+        virtual void clone(void* const* src, void** dest) const = 0;
+        virtual void* get_value(void** src) const = 0;
+        virtual int compareTo(void* const* x, void* const* y) const = 0;
     };
 
     template<typename T>
@@ -101,12 +94,12 @@ namespace anyimpl {
         static_assert(sizeof(T) <= sizeof(void *), "not appropriate for small_any_policy");
         static constexpr bool is_small_policy = true;
 
-        virtual void static_delete(void**) override { }
-        virtual void copy_from_value(void const* src, void** dest) override
+        virtual void static_delete(void**) const override { }
+        virtual void copy_from_value(void const* src, void** dest) const override
             { new(dest) T(*reinterpret_cast<T const*>(src)); }
-        virtual void clone(void* const* src, void** dest) override { *dest = *src; }
-        virtual void* get_value(void** src) override { return reinterpret_cast<void*>(src); }
-        virtual int compareTo(void* const* x, void* const* y) override
+        virtual void clone(void* const* src, void** dest) const override { *dest = *src; }
+        virtual void* get_value(void** src) const override { return reinterpret_cast<void*>(src); }
+        virtual int compareTo(void* const* x, void* const* y) const override
             { return compare_to<T>()(*(reinterpret_cast<T const*>(x)), *(reinterpret_cast<T const*>(y))); }
     };
 
@@ -114,26 +107,28 @@ namespace anyimpl {
     struct big_any_policy final : base_any_policy {
         static constexpr bool is_small_policy = false;
 
-        virtual void static_delete(void** x) override { if (*x) {
+        virtual void static_delete(void** x) const override { if (*x) {
             delete(*reinterpret_cast<T**>(x)); } *x = NULL; }
-        virtual void copy_from_value(void const* src, void** dest) override {
+        virtual void copy_from_value(void const* src, void** dest) const override {
            *dest = new T(*reinterpret_cast<T const*>(src)); }
-        virtual void clone(void* const* src, void** dest) override {
+        virtual void clone(void* const* src, void** dest) const override {
            *dest = new T(**reinterpret_cast<T* const*>(src)); }
-        virtual void* get_value(void** src) override { return *src; }
-        virtual int compareTo(void* const* x, void* const* y) override
-            { return compare_to<T>()(*(reinterpret_cast<T const*>(x)), *(reinterpret_cast<T const*>(y))); }
+        virtual void* get_value(void** src) const override { return *src; }
+        virtual int compareTo(void* const* x, void* const* y) const override
+            { return compare_to<T>()(*(reinterpret_cast<T const*>(*x)), *(reinterpret_cast<T const*>(*y))); }
     };
 
     template<typename T>
     struct choose_policy {
-        using type = typename std::conditional_t<is_small<T>::value, small_any_policy<T>, big_any_policy<T>>;
+        using __cleaned_type = std::remove_cv_t<std::remove_reference_t<T>>;
+        using type = typename std::conditional_t<std::is_pointer<T>::value, small_any_policy<void *>,
+                              std::conditional_t<is_small<T>, small_any_policy<__cleaned_type>,
+                                                                big_any_policy<__cleaned_type>>>;
     };
 
 
     /// Choosing the policy for an any type is illegal, but should never happen.
     /// This is designed to throw a compiler error.
-    struct any;
     template<>
     struct choose_policy<any> {
         using type = void;
@@ -141,20 +136,25 @@ namespace anyimpl {
 
     static_assert(choose_policy<int>::type::is_small_policy, "a");
     static_assert(!choose_policy<std::string>::type::is_small_policy, "a");
+    static_assert(choose_policy<const char *>::type::is_small_policy &&
+                  std::is_same<choose_policy<const char *>::type, small_any_policy<void *>>::value, "a");
 
     /// This function will return a different policy for each type.
     template<typename T>
-    base_any_policy* get_policy() {
-        static typename choose_policy<T>::type policy;
+    const base_any_policy* get_policy() noexcept {
+        static const typename choose_policy<T>::type policy;
         return &policy;
     }
 }
 
-struct any
+struct any final
 {
 private:
+    struct empty_any
+    { int compareTo(const empty_any &) const { return 0; } };
+    static_assert(anyimpl::compare_to<empty_any>::type == 3, "a");
     // fields
-    anyimpl::base_any_policy* policy = anyimpl::get_policy<anyimpl::empty_any>();
+    const anyimpl::base_any_policy* policy = anyimpl::get_policy<empty_any>();
     void* object = nullptr;
 
 public:
@@ -179,8 +179,9 @@ public:
     }
 
     /// Copy constructor.
-    any(const any& x) {
-        assign(x);
+    any(const any& x) :
+        policy(x.policy) {
+        policy->clone(&x.object, &object);
     }
 
     /// Move constructor.
@@ -209,6 +210,7 @@ public:
     /// Assignment function.
     template <typename T>
     any& assign(const T& x) {
+        static_assert(!std::is_same<T, any>::value, "this function shouldn't be called with any");
         reset();
         policy = anyimpl::get_policy<T>();
         policy->copy_from_value(&x, &object);
@@ -216,13 +218,16 @@ public:
     }
 
     /// Assignment operator.
-    template<typename T>
+    template<typename T, std::enable_if_t<!std::is_same<T, any>::value>>
     any& operator=(const T& x) {
-        return assign(x);
+        return assign<T>(x);
     }
 
     /// Assignment operator.
-    any& operator=(any x) noexcept {
+    any& operator=(const any &x) {
+        return assign(x);
+    }
+    any& operator=(any &&x) noexcept {
         return swap(x);
     }
 
@@ -257,34 +262,21 @@ public:
     }
 
     template<typename T>
-    const T& cast(T &def) const {
+    const T& cast(const T &def) const {
         if (empty())
             return def;
-        if (policy != anyimpl::get_policy<T>())
-            throw bad_any_cast();
-        T* r = reinterpret_cast<T*>(policy->get_value(const_cast<void**>(&object)));
-        return *r;
-    }
-
-    template<typename T>
-    const T& cast(T &&def) const {
-        if (empty())
-            return def;
-        if (policy != anyimpl::get_policy<T>())
-            throw bad_any_cast();
-        T* r = reinterpret_cast<T*>(policy->get_value(const_cast<void**>(&object)));
-        return *r;
+        return cast<T>();
     }
 
     /// Returns true if the any contains no value.
     bool empty() const noexcept {
-        return policy == anyimpl::get_policy<anyimpl::empty_any>();
+        return policy == anyimpl::get_policy<empty_any>();
     }
 
     /// Frees any allocated memory, and sets the value to NULL.
     void reset() {
         policy->static_delete(&object);
-        policy = anyimpl::get_policy<anyimpl::empty_any>();
+        policy = anyimpl::get_policy<empty_any>();
     }
 
     /// Returns true if the two types are the same.
@@ -313,7 +305,7 @@ struct any_type_cast {
     using type = T;
     using castType = std::remove_cv_t<std::remove_reference_t<T>>;
 
-    static type get(const any &a, std::add_rvalue_reference_t<castType> def) {
+    static type get(const any &a, std::add_lvalue_reference_t<std::add_const_t<castType>> def) {
         return static_cast<type>(a.cast<castType>(def));
     }
 
@@ -323,9 +315,12 @@ struct any_type_cast {
 };
 
 template<typename T>
-struct any_type_cast<T, std::enable_if_t<std::is_enum<T>::value>> {
+struct any_type_cast<T, std::enable_if_t<std::is_enum<T>::value ||
+        ((anyimpl::is_small<T>) && std::is_arithmetic<T>::value) >> {
     using type = T;
-    using castType = int;
+    using castType = std::conditional_t<std::is_signed<T>::value,intptr_t,uintptr_t>;
+
+    static_assert(sizeof(T) <= sizeof(castType), "test here for sizes");
 
     static type get(const any &a, castType def) {
         return static_cast<type>(a.cast<castType>(def));

@@ -14,18 +14,20 @@ class ProjectCalendar;
 
 template <typename T>
 class TimephasedItem {
+        static_assert(std::is_same<T, double>::value || std::is_same<T, Duration>::value,
+                      "TimephasedItem should be used with either double or Duration types");
     private:
-        common::DateTime m_start;
         T m_totalAmount;
-        common::DateTime m_finish;
         T m_amountPerDay;
+        common::DateTime m_start;
+        common::DateTime m_finish;
         bool m_modified;
     public:
         TimephasedItem() = default;
         TimephasedItem(const TimephasedItem &) = default;
         TimephasedItem(common::DateTime start, common::DateTime finish, bool modified, T totalAmount, T amountPerDay)
-            : m_start(start), m_totalAmount(totalAmount), m_finish(finish),
-              m_amountPerDay(amountPerDay), m_modified(modified)
+            : m_totalAmount(totalAmount), m_amountPerDay(amountPerDay),
+              m_start(start), m_finish(finish), m_modified(modified)
         {}
 
         MPXJPP_GETTER_SETTER(start, common::DateTime)
@@ -45,7 +47,9 @@ class TimephasedItem {
 template <typename T>
 class TimephasedItemContainer {
     public:
-        virtual const std::vector<TimephasedItem<T>> &data() const = 0;
+        using data_type = std::vector<TimephasedItem<T>>;
+
+        virtual const data_type &data() const = 0;
         virtual bool hasData() const = 0;
 };
 

@@ -39,10 +39,12 @@ int main()
     cout << sizeof(mpxjpp::Duration) << endl;
     cout << sizeof(std::shared_ptr<std::string>) << endl;
 
-    year_month_day i = 1998_y/jan/1_d;
-    auto j = static_cast<sys_days>(i) + seconds(5);
-    local_days d(i);
-    d.time_since_epoch().count();
+//  year_month_day i = 1998_y/jan/1_d;
+//  auto j = static_cast<sys_days>(i) + seconds(5);
+//  local_days d(i);
+//  d.time_since_epoch().count();
+
+//    cout << i << endl << normalize(2016_y/mar/0) << endl;
 
     return 0;
 }

@@ -38,8 +38,11 @@ private:
     std::string m_name;
     int m_size;
 public:
-    FontBase(int index, std::string name, int size) :
+    FontBase(int index, const std::string &name, int size) :
         m_index(index), m_name(name), m_size(size)
+    {}
+    FontBase(int index, std::string &&name, int size) :
+        m_index(index), m_name(std::move(name)), m_size(size)
     {}
 
     MPXJPP_GETTER(name, const std::string &)
@@ -66,8 +69,8 @@ public:
     {}
 
     MPXJPP_GETTER(fontBase, const FontBase &)
-    MPXJPP_GETTER(color, const Color &)
-    MPXJPP_GETTER(backgroundColor, const Color &)
+    MPXJPP_GETTER(color, Color)
+    MPXJPP_GETTER(backgroundColor, Color)
     MPXJPP_GETTER(backgroundPattern, BackgroundPattern)
     MPXJPP_GETTER(italic, bool)
     MPXJPP_GETTER(bold, bool)
