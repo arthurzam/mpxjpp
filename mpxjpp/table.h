@@ -20,66 +20,66 @@ namespace mpxjpp {
  * be defined here.
  */
 class Table final {
-	private:
-		int m_id = 0;
-		std::string m_name;
-		bool m_resourceFlag = false;
-		std::vector<Column> m_columns;
-	public:
-		Table() = default;
+    private:
+        int m_id = 0;
+        std::string m_name;
+        bool m_resourceFlag = false;
+        std::vector<Column> m_columns;
+    public:
+        Table() = default;
 
-		MPXJPP_GETTER_SETTER(id, int)
-		MPXJPP_GETTER_SETTER(name, const std::string &)
-		MPXJPP_GETTER_SETTER(resourceFlag, bool)
+        MPXJPP_GETTER_SETTER(id, int)
+        MPXJPP_GETTER_SETTER(name, const std::string &)
+        MPXJPP_GETTER_SETTER(resourceFlag, bool)
 
-		MPXJPP_GETTER(columns, const std::vector<Column> &)
+        MPXJPP_GETTER(columns, const std::vector<Column> &)
 
-		void addColumn(const Column &c) {
-			m_columns.push_back(c);
-		}
-		void addColumn(Column &&c) {
-			m_columns.push_back(std::move(c));
-		}
+        void addColumn(const Column &c) {
+            m_columns.push_back(c);
+        }
+        void addColumn(Column &&c) {
+            m_columns.push_back(std::move(c));
+        }
 };
 
 class TableContainer final : public ListWithCallbacks<Table> {
-	private:
-		std::map<std::string, int> m_taskTablesByName, m_resourceTablesByName;
+    private:
+        std::map<std::string, int> m_taskTablesByName, m_resourceTablesByName;
 
-		std::map<std::string, int> &getIndex(const Table &table) {
-			return table.resourceFlag() ? m_resourceTablesByName : m_taskTablesByName;
-		}
+        std::map<std::string, int> &getIndex(const Table &table) {
+            return table.resourceFlag() ? m_resourceTablesByName : m_taskTablesByName;
+        }
 
-	protected:
-		virtual void added(int index) override {
-			const Table &table = (*this)[index];
-			getIndex(table).insert({table.name(), index});
-		}
-		virtual void removed(const Table &val) override {
-			getIndex(val).erase(val.name());
-		}
-	public:
-		/**
-		 * Utility method to retrieve the definition of a task table by name.
-		 * This method will return null if the table name is not recognised.
-		 *
-		 * @param name table name
-		 * @return table instance
-		 */
-		Table &getTaskTableByName(const std::string &name) {
-			return (*this)[m_taskTablesByName[name]];
-		}
+    protected:
+        virtual void added(int index) override {
+            const Table &table = (*this)[index];
+            getIndex(table).insert({table.name(), index});
+        }
+        virtual void removed(const Table &val) override {
+            getIndex(val).erase(val.name());
+        }
+    public:
+        /**
+         * Utility method to retrieve the definition of a task table by name.
+         * This method will return null if the table name is not recognised.
+         *
+         * @param name table name
+         * @return table instance
+         */
+        Table &getTaskTableByName(const std::string &name) {
+            return (*this)[m_taskTablesByName[name]];
+        }
 
-		/**
-		 * Utility method to retrieve the definition of a resource table by name.
-		 * This method will return null if the table name is not recognised.
-		 *
-		 * @param name table name
-		 * @return table instance
-		 */
-		Table &getResourceTableByName(const std::string &name) {
-			return (*this)[m_resourceTablesByName[name]];
-		}
+        /**
+         * Utility method to retrieve the definition of a resource table by name.
+         * This method will return null if the table name is not recognised.
+         *
+         * @param name table name
+         * @return table instance
+         */
+        Table &getResourceTableByName(const std::string &name) {
+            return (*this)[m_resourceTablesByName[name]];
+        }
 };
 
 }

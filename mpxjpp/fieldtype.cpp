@@ -11,8 +11,8 @@ struct FieldType::priv_field_t AssignmentField::g_fields[] = {
 };
 
 struct FieldType::priv_arr_t AssignmentField::g_class = {
-	FieldTypeClass::ASSIGNMENT,
-	AssignmentField::g_fields
+    FieldTypeClass::ASSIGNMENT,
+    AssignmentField::g_fields
 };
 
 struct FieldType::priv_field_t ConstraintField::g_fields[] = {
@@ -20,8 +20,8 @@ struct FieldType::priv_field_t ConstraintField::g_fields[] = {
 };
 
 struct FieldType::priv_arr_t ConstraintField::g_class = {
-	FieldTypeClass::CONSTRAINT,
-	ConstraintField::g_fields
+    FieldTypeClass::CONSTRAINT,
+    ConstraintField::g_fields
 };
 
 struct FieldType::priv_field_t ProjectField::g_fields[] = {
@@ -29,8 +29,8 @@ struct FieldType::priv_field_t ProjectField::g_fields[] = {
 };
 
 struct FieldType::priv_arr_t ProjectField::g_class = {
-	FieldTypeClass::PROJECT,
-	ProjectField::g_fields
+    FieldTypeClass::PROJECT,
+    ProjectField::g_fields
 };
 
 struct FieldType::priv_field_t ResourceField::g_fields[] = {
@@ -38,8 +38,8 @@ struct FieldType::priv_field_t ResourceField::g_fields[] = {
 };
 
 struct FieldType::priv_arr_t ResourceField::g_class = {
-	FieldTypeClass::RESOURCE,
-	ResourceField::g_fields
+    FieldTypeClass::RESOURCE,
+    ResourceField::g_fields
 };
 
 struct FieldType::priv_field_t TaskField::g_fields[] = {
@@ -47,6 +47,6 @@ struct FieldType::priv_field_t TaskField::g_fields[] = {
 };
 
 struct FieldType::priv_arr_t TaskField::g_class = {
-	FieldTypeClass::TASK,
-	TaskField::g_fields
+    FieldTypeClass::TASK,
+    TaskField::g_fields
 };

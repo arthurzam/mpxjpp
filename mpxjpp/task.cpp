@@ -3,9 +3,9 @@
 using namespace mpxjpp;
 
 void Task::generateWBS(const TaskPtr &parent) {
-	if(!parent) {
+    if(!parent) {
 
-	}
+    }
 }
 
 TaskPtr Task::addTask()
