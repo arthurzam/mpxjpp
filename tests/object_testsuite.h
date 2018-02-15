@@ -6,42 +6,44 @@
 #include <mpxjpp/common/object.h>
 #include <mpxjpp/common/calendar.h>
 
+using mpxjpp::common::any;
+
 class ObjectAnyTest : public CxxTest::TestSuite
 {
 public:
     void testEmpty() {
-        mpxjpp::common::any obj;
+        any obj;
         TS_ASSERT(obj.empty());
     }
 
     void testAssignInteger() {
-        mpxjpp::common::any obj(2);
+        any obj(2);
         TS_ASSERT(!obj.empty());
         TS_ASSERT(obj.isType<int>());
         TS_ASSERT_EQUALS(obj.cast<int>(), 2);
     }
 
     void testAssignStringLiteral() {
-        mpxjpp::common::any obj("hello world");
+        any obj("hello world");
         TS_ASSERT(!obj.empty());
         TS_ASSERT(obj.isType<const char *>());
         TS_ASSERT_EQUALS(obj.cast<const char *>(), std::string("hello world"));
     }
 
     void testBadCast() {
-        mpxjpp::common::any obj(2);
+        any obj(2);
         TS_ASSERT_THROWS(obj.cast<double>(), mpxjpp::common::bad_any_cast);
     }
 
     void testCastDefault() {
-        mpxjpp::common::any obj;
+        any obj;
         TS_ASSERT_EQUALS(obj.cast<int>(2), 2);
         TS_ASSERT_EQUALS(obj.cast<double>(2.0), 2.0);
         TS_ASSERT_EQUALS(obj.cast<const char *>("a"), std::string("a"));
     }
 
     void testAssignContinues() {
-        mpxjpp::common::any a;
+        any a;
         TS_ASSERT(a.empty());
 
         TS_TRACE("assigning integer");
@@ -57,7 +59,7 @@ public:
         TS_ASSERT_EQUALS(a.cast<const char *>(), std::string("hello world"));
 
         TS_TRACE("assigning integer as move");
-        mpxjpp::common::any b = 7.0;
+        any b = 7.0;
         TS_ASSERT_EQUALS(b.cast<double>(), 7.0);
         a = std::move(b);
         TS_ASSERT_EQUALS(a.cast<double>(), 7.0);
@@ -65,7 +67,7 @@ public:
     }
 
     void testSwap() {
-        mpxjpp::common::any a(5), b(1.0);
+        any a(5), b(1.0);
 
         TS_ASSERT_EQUALS(a.cast<int>(), 5);
         TS_ASSERT_EQUALS(b.cast<double>(), 1.0);
@@ -77,29 +79,38 @@ public:
     }
 
     void testConstructors() {
-        mpxjpp::common::any a(6);
+        any a(6);
         TS_ASSERT_EQUALS(a.cast<int>(), 6);
 
-        mpxjpp::common::any b(a);
+        any b(a);
         TS_ASSERT_EQUALS(a.cast<int>(), 6);
         TS_ASSERT_EQUALS(b.cast<int>(), 6);
 
-        mpxjpp::common::any c(std::move(a));
+        any c(std::move(a));
         TS_ASSERT_EQUALS(b.cast<int>(), 6);
         TS_ASSERT_EQUALS(c.cast<int>(), 6);
         TS_ASSERT(a.empty());
     }
 
     void testCompareTo() {
-        mpxjpp::common::any a(6), b(5), c(7), d(6);
+        TS_TRACE("comparing integers");
+        any a(6), b(5), c(7), d(6);
         TS_ASSERT(a.compareTo(b) > 0);
         TS_ASSERT(a.compareTo(c) < 0);
         TS_ASSERT(a.compareTo(d) == 0);
         TS_ASSERT(a.compareTo(6) == 0);
 
-        mpxjpp::common::any e(1.0);
+        TS_TRACE("checking bad cast over compare");
+        any e(1.0);
         TS_ASSERT_THROWS(a.compareTo(e), mpxjpp::common::bad_any_cast);
-        TS_ASSERT_THROWS(a.compareTo(mpxjpp::common::any()), mpxjpp::common::bad_any_cast);
+        TS_ASSERT_THROWS(a.compareTo(any()), mpxjpp::common::bad_any_cast);
+
+        TS_TRACE("comparing strings");
+        any s1(std::string("a")), s2(std::string("b")), s3(std::string("c"));
+        TS_ASSERT_EQUALS(s1.cast<std::string>(), std::string("a"));
+        TS_ASSERT(s1.compareTo(s2) < 0);
+        TS_ASSERT(s2.compareTo(s3) < 0);
+        TS_ASSERT(s1.compareTo(s1) == 0);
     }
 
     void testCalendarCast() {
