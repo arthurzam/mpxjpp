@@ -5,11 +5,26 @@
 #include <string>
 #include <vector>
 
-#include "column.h"
+#include "fieldtype.h"
 #include "listwithcallbacks.h"
 #include "mpxjpp-gens.h"
 
 namespace mpxjpp {
+
+struct Column final {
+    enum class Align : unsigned char {
+        ALIGN_LEFT = 1,
+        ALIGN_CENTER = 2,
+        ALIGN_RIGHT = 3
+    };
+
+    std::string title;
+    FieldType fieldType;
+    int width = 0;
+    Align alignTitle = Align::ALIGN_RIGHT;
+    Align alignData = Align::ALIGN_RIGHT;
+};
+static_assert(std::is_nothrow_move_constructible<Column>::value, "Column should be checked");
 
 /**
  * This class represents the definition of a table of data from an MPP file.
@@ -21,12 +36,16 @@ namespace mpxjpp {
  */
 class Table final {
     private:
-        int m_id = 0;
         std::string m_name;
-        bool m_resourceFlag = false;
         std::vector<Column> m_columns;
+        int m_id = 0;
+        bool m_resourceFlag = false;
     public:
         Table() = default;
+
+        Table(int id, bool resourceFlag, std::string &&name) :
+            m_name(std::move(name)), m_id(id), m_resourceFlag(resourceFlag)
+        { }
 
         MPXJPP_GETTER_SETTER(id, int)
         MPXJPP_GETTER_SETTER(name, const std::string &)
@@ -41,6 +60,7 @@ class Table final {
             m_columns.push_back(std::move(c));
         }
 };
+static_assert(std::is_nothrow_move_constructible<Table>::value, "Table should be checked");
 
 class TableContainer final : public ListWithCallbacks<Table> {
     private:
