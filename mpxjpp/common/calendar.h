@@ -28,44 +28,54 @@ struct compare_to<seconds> {
 };
 }
 
-template<>
-struct any_type_cast<Date> {
-    using type = Date;
-    using castType = int32_t;
+constexpr inline year_month_day normalize(year_month_day ymd)
+{
+    ymd += months{0};
+    ymd = sys_days{ymd};
+    return ymd;
+}
 
-    static type get(const any &a, type def) {
-        union {
-            castType n;
-            type t;
-        } u;
-        u.t = def;
-        u.n = a.cast<castType>(u.n);
-        return u.t;
-    }
+//template<>
+//struct any_type_cast<Date> {
+//  using type = Date;
+//  using castType = int32_t;
 
-    static void set(any &a, type var) {
-        union {
-            castType n;
-            type t;
-        } u;
-        u.t = var;
-        a.assign<castType>(u.n);
-    }
-};
+//  static type get(const any &a, type def) {
+//      union {
+//          castType n;
+//          type t;
+//      } u;
+//      u.t = def;
+//        u.n = a.cast<castType>(u.n);
+//      return u.t;
+//  }
 
-template<>
-struct any_type_cast<DateTime> {
-    using type = DateTime;
-    using castType = DateTime::rep;
+//  static void set(any &a, type var) {
+//      union {
+//          castType n;
+//          type t;
+//      } u;
+//      u.t = var;
+//      a.assign<castType>(u.n);
+//  }
+//};
 
-    static type get(const any &a, type def) {
-        return type(a.cast<castType>(def.count()));
-    }
+static_assert(anyimpl::is_small<Date>, "Date isn't small enough");
 
-    static void set(any &a, type var) {
-        a.assign<castType>(var.count());
-    }
-};
+//template<>
+//struct any_type_cast<DateTime> {
+//  using type = DateTime;
+//  using castType = DateTime::rep;
+
+//  static type get(const any &a, type def) {
+//      return type(a.cast<castType>(def.count()));
+//  }
+
+//  static void set(any &a, type var) {
+//      a.assign<castType>(var.count());
+//  }
+//};
+static_assert(anyimpl::is_small<DateTime>, "DateTime isn't small enough");
 
 }
 }

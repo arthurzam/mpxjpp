@@ -66,7 +66,6 @@ enum class DataType {
 
 struct FieldType {
     friend class FieldContainer;
-//  friend class common::anyimpl::compare_to<FieldType>;
 protected:
     struct priv_field_t {
         DataType m_dataType;
@@ -131,11 +130,6 @@ static_assert(std::is_polymorphic<FieldType>::value == false, "FieldType shouldn
  * using their identifiers.
  */
 class FieldContainer {
-    /** TODO: vector<bool> optimization
-      *
-      * as all FieldType uses aren't using the value, we can extract all the booleans to an vector<bool>
-      * for better storage usement.
-      */
 private:
     common::any *m_array;
 protected:

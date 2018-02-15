@@ -15,38 +15,32 @@
 namespace mpxjpp {
 
 /**
- * This class represents a clause from a definition of a group.
+ * This struct represents a clause from a definition of a group.
  */
-class GroupClause final {
-    private:
-        FieldType m_field;
-        bool m_ascending;
-        common::FontStyle m_font; // CHECK: maybe some kind of pointer
-        common::Color m_cellBackgroundColor;
-        common::BackgroundPattern m_pattern;
-        int m_groupOn;
-        common::any m_startAt;
-        common::any m_groupInterval;
-    public:
-        MPXJPP_GETTER_SETTER(ascending, bool)
-        MPXJPP_GETTER_SETTER(cellBackgroundColor, common::Color)
-        MPXJPP_GETTER_SETTER(field, FieldType)
-        MPXJPP_GETTER_SETTER(font, common::FontStyle)
-        MPXJPP_GETTER_SETTER(groupInterval, common::any)
-        MPXJPP_GETTER_SETTER(startAt, common::any)
-        MPXJPP_GETTER_SETTER(groupOn, int)
-        MPXJPP_GETTER_SETTER(pattern, common::BackgroundPattern)
+struct GroupClause final {
+public:
+    FieldType field;
+    bool ascending;
+    common::FontStyle font; // CHECK: maybe some kind of pointer
+    common::Color cellBackgroundColor;
+    common::BackgroundPattern pattern;
+    int groupOn;
+    common::any startAt;
+    common::any groupInterval;
 };
 
 class Group final {
     private:
-        int m_id;
         std::string m_name;
-        bool m_showSummaryTasks;
         std::vector<GroupClause> m_clauses;
+        int m_id;
+        bool m_showSummaryTasks;
     public:
         Group(int id, const std::string &name, bool showSummaryTasks)
-            : m_id(id), m_name(name), m_showSummaryTasks(showSummaryTasks)
+            : m_name(name), m_id(id), m_showSummaryTasks(showSummaryTasks)
+        {}
+        Group(int id, std::string &&name, bool showSummaryTasks)
+            : m_name(std::move(name)), m_id(id), m_showSummaryTasks(showSummaryTasks)
         {}
 
         MPXJPP_GETTER(id, int)
@@ -56,6 +50,10 @@ class Group final {
         MPXJPP_GETTER(clauses, const std::vector<GroupClause> &)
         void addGroupClause(const GroupClause &clause) {
             this->m_clauses.push_back(clause);
+        }
+        template<typename... Args>
+        void emplaceGroupClause(Args&&... args) {
+            this->m_clauses.emplace_back(std::forward<Args>(args)...);
         }
 };
 

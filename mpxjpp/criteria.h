@@ -13,24 +13,12 @@ namespace mpxjpp {
 
 class ProjectProperties;
 
-class GenericCriteriaPrompt final {
-private:
-    DataType m_type;
-    std::string m_prompt;
-public:
-    GenericCriteriaPrompt(DataType type, const std::string &prompt) :
-        m_type(type), m_prompt(prompt)
-    {}
-
-    MPXJPP_GETTER(type, DataType)
-    MPXJPP_GETTER(prompt, const std::string &)
+struct GenericCriteriaPrompt final {
+    std::string prompt;
+    DataType type;
 
     bool operator ==(const GenericCriteriaPrompt &other) const {
-        return m_type == other.m_type && m_prompt == other.m_prompt;
-    }
-
-    int compareTo(const GenericCriteriaPrompt &b) const {
-        return static_cast<int>(this->m_type) - static_cast<int>(b.m_type);
+        return type == other.type && prompt == other.prompt;
     }
 };
 }
@@ -39,7 +27,7 @@ namespace std {
 template<>
 struct hash<mpxjpp::GenericCriteriaPrompt> {
     size_t operator()(const mpxjpp::GenericCriteriaPrompt &val) const {
-        return (static_cast<size_t>(val.type()) * 0x61) ^ std::hash<std::string>()(val.prompt());
+        return (static_cast<size_t>(val.type) * 0x61) ^ std::hash<std::string>()(val.prompt);
     }
 };
 }

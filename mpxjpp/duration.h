@@ -128,15 +128,14 @@ class Duration final {
         }
 
         constexpr bool operator ==(const Duration &other) {
-            return m_units == other.m_units &&
-                    ::abs(m_duration - other.m_duration) < 0.00001;
+            return m_units == other.m_units && (abs(m_duration - other.m_duration) < 0.00001);
         }
 
-        int compareTo(Duration rhs) const {
+        constexpr int compareTo(Duration rhs) const {
             if (m_units != rhs.m_units) {
                 rhs = convertUnits(rhs.m_duration, rhs.m_units, m_units, (8 * 60), (5 * 8 * 60), 20);
             }
-            return ::abs(m_duration - rhs.m_duration) < 0.00001 ? 0 : m_duration < rhs.m_duration ? -1 : 1;
+            return abs(m_duration - rhs.m_duration) < 0.00001 ? 0 : m_duration < rhs.m_duration ? -1 : 1;
         }
 
         static Duration add(Duration a, Duration b, ProjectProperties &defaults);

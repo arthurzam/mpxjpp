@@ -7,6 +7,7 @@
 #include <typeinfo>
 
 using namespace mpxjpp;
+namespace strutils = mpxjpp::common::strutils;
 
 namespace {
 
@@ -46,7 +47,7 @@ static int evaluateCompareTo(common::any &lhs, common::any &rhs) {
 static bool evaluateContains(common::any &lhs, common::any &rhs) {
     common::any &r = getSingleOperand(rhs);
     if (lhs.isType<std::string>() && r.isType<std::string>())
-        return common::str_toupper(lhs.cast<std::string>()).find(common::str_toupper(r.cast<std::string>())) != std::string::npos;
+        return strutils::str_toupper(lhs.cast<std::string>()).find(strutils::str_toupper(r.cast<std::string>())) != std::string::npos;
     return false;
 }
 

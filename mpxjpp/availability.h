@@ -9,31 +9,24 @@
 
 namespace mpxjpp {
 
-class Availability final {
-    private:
-        DateRange m_range;
-        double m_units;
-    public:
-        constexpr Availability(common::Time startDate, common::Time endDate, double units) :
-            m_range(startDate, endDate), m_units(units)
-        {}
+struct Availability final {
+    DateRange range;
+    double units;
 
-        constexpr MPXJPP_GETTER(range, DateRange)
-        constexpr MPXJPP_GETTER(units, double)
-
-        constexpr bool operator ==(const Availability &other) {
-            return m_range.compareTo(other.m_range) == 0;
-        }
-        constexpr bool operator <(const Availability &other) {
-            return m_range.compareTo(other.m_range) < 0;
-        }
+//    constexpr bool operator ==(const Availability &other) {
+//        return range.compareTo(other.range) == 0;
+//    }
+//    constexpr bool operator <(const Availability &other) {
+//        return range.compareTo(other.range) < 0;
+//    }
 };
+static_assert(std::is_pod<Availability>::value, "Availability should be POD");
 
 class AvailabilityTable final : public std::vector<Availability> {
     public:
         Availability *getEntryByDate(common::DateTime date) {
             for (auto &entry : *this) {
-                const int c = entry.range().compareTo(date);
+                const int c = entry.range.compareTo(date);
                 if (c == 0)
                     return &entry;
                 else if (c < 0)

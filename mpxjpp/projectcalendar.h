@@ -272,7 +272,7 @@ public:
     }
 
     bool operator <(const ProjectCalendarWeek &o) {
-        return m_dateRange.start() < o.m_dateRange.start();
+        return m_dateRange.start < o.m_dateRange.start;
     }
 };
 

@@ -2,6 +2,7 @@
 #define VIEW_H
 
 #include <string>
+#include <memory>
 
 #include "listwithcallbacks.h"
 #include "mpxjpp-gens.h"
@@ -66,7 +67,7 @@ class View {
         virtual ViewType getType() = 0;
 };
 
-class ViewContainer : public ListWithCallbacks<View> {
+class ViewContainer : public ListWithCallbacks<std::unique_ptr<View>> {
     private:
         ViewState m_viewState;
     public:

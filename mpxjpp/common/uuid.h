@@ -21,13 +21,13 @@ public:
 
     constexpr uint8_t operator [] (unsigned index) const {
         index = (index & 0b1111);
-        uint64_t bits = (index & 0b1000) ? mostSigBits : leastSigBits;
-        uint64_t move = static_cast<uint64_t>(index & 0b0111) << 3;
+        const uint64_t bits = (index & 0b1000) ? mostSigBits : leastSigBits;
+        const unsigned move = (index & 0b0111) << 3;
         return (bits & (static_cast<uint64_t>(0xFF) << move)) >> move;
     }
 
     constexpr int compareTo(UUID x) const {
-        return mostSigBits == x.mostSigBits ? leastSigBits - x.leastSigBits : mostSigBits - x.mostSigBits;
+        return (mostSigBits == x.mostSigBits) ? (leastSigBits - x.leastSigBits) : (mostSigBits - x.mostSigBits);
     }
 };
 

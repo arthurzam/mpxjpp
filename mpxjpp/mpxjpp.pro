@@ -20,7 +20,8 @@ SOURCES += main.cpp \
     projectproperties.cpp \
     customfield.cpp \
     projectfile.cpp \
-    task.cpp
+    task.cpp \
+    mpp/mpputility.cpp
 
 HEADERS += \
     daterange.h \
@@ -32,7 +33,6 @@ HEADERS += \
     projectconfig.h \
     timeunit.h \
     rate.h \
-    column.h \
     view.h \
     viewstate.h \
     enums.h \
@@ -63,7 +63,8 @@ HEADERS += \
     projectproperties.h \
     customfield.h \
     common/uuid.h \
-    projectfile.h
+    projectfile.h \
+    mpp/mpputility.h
 
 QMAKE_CXXFLAGS_RELEASE += -Wpedantic -Wextra
 #QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin

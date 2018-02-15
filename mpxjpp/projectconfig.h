@@ -77,13 +77,11 @@ class ProjectConfig
             return ++m_taskID;
         }
 
-        int getNextResourceUniqueID()
-        {
+        int getNextResourceUniqueID() {
             return ++m_resourceUniqueID;
         }
 
-        int getNextResourceID()
-        {
+        int getNextResourceID() {
             return ++m_resourceID;
         }
 

@@ -5,6 +5,7 @@
 #include "common/strutils.h"
 
 using namespace mpxjpp;
+namespace strutils = mpxjpp::common::strutils;
 
 void ProjectCalendarHours::set_day(Day d) {
     if (d == Day::__UNINITIALIZED__)
@@ -111,10 +112,10 @@ std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::addDefaultDerivedCale
 
 std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::getByName(const std::string &calendarName) const {
     if (!calendarName.empty()) {
-        const std::string calName = common::str_toupper(calendarName);
+        const std::string calName = strutils::str_toupper(calendarName);
         for (const auto &calendar : *this) {
             const std::string &name = calendar->name();
-            if (!name.empty() && common::str_toupper(name) == calName)
+            if (!name.empty() && strutils::str_toupper(name) == calName)
                 return calendar;
         }
     }
