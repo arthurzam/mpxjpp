@@ -1,16 +1,17 @@
 #include "recurringdata.h"
 
 using namespace mpxjpp;
+using namespace mpxjpp::common;
 
-void RecurringData::getDailyDates(Calendar &calendar, std::vector<common::Date> &dates) const {
+void RecurringData::getDailyDates(Calendar &calendar, std::vector<Date> &dates) const {
     for (size_t index = 0; index < dates.size(); ++index) {
         dates[index] = calendar;
-        calendar += common::days(m_frequency);
+        calendar += days(m_frequency);
     }
 }
 
-void RecurringData::getWeeklyDates(Calendar &calendar, std::vector<common::Date> &dates) const {
-    unsigned currentDay = static_cast<unsigned>(common::weekday(calendar)); // [0-6]
+void RecurringData::getWeeklyDates(Calendar &calendar, std::vector<Date> &dates) const {
+    unsigned currentDay = static_cast<unsigned>(weekday(calendar)); // [0-6]
     unsigned occurrenceIndex = 0;
 
     while (occurrenceIndex < dates.size()) {
@@ -18,7 +19,7 @@ void RecurringData::getWeeklyDates(Calendar &calendar, std::vector<common::Date>
         for (unsigned dayIndex = 0; dayIndex < 7; dayIndex++) {
             if (weeklyDay(static_cast<Day>(currentDay + 1))) {
                 if (offset != 0) {
-                    calendar += common::days(offset);
+                    calendar += days(offset);
                 }
                 dates[occurrenceIndex] = calendar;
                 ++occurrenceIndex;
@@ -35,28 +36,33 @@ void RecurringData::getWeeklyDates(Calendar &calendar, std::vector<common::Date>
 
         if (m_frequency > 1)
            offset += (7 * (m_frequency - 1));
-        calendar += common::days(offset);
+        calendar += days(offset);
     }
 }
 
-void RecurringData::getMonthlyRelativeDates(Calendar &calendar, std::vector<common::Date> &dates) const {
-//  unsigned occurrenceIndex = 0;
-//  common::DateTime startDate = static_cast<std::common::DateTime>(calendar);
-//  calendar.set(Calendar.DAY_OF_MONTH, 1);
+void RecurringData::getMonthlyRelativeDates(Calendar &calendar, std::vector<Date> &dates) const {
+    (void)calendar;
+    (void)dates;
+}
 
-//  while (occurrenceIndex < dates.size())
-//  {
-//     if (m_dayNumber > 4)
-//        setCalendarToLastRelativeDay(calendar);
-//     else
-//        setCalendarToOrdinalRelativeDay(calendar, m_dayNumber);
-//     if (calendar.compareTo(startDate) > 0) {
-//        dates[occurrenceIndex] = static_cast<common::DateTime>(calendar);
-//        ++occurrenceIndex;
-//        if (occurrenceIndex == dates.size())
-//           break;
-//     }
-//     calendar.set(Calendar.DAY_OF_MONTH, 1);
-//     calendar.add(Calendar.MONTH, frequency);
-//  }
+void RecurringData::getMonthlyAbsoluteDates(RecurringData::Calendar &calendar, std::vector<Date> &dates) const {
+    // TODO: bad algorithm
+    Date cal(calendar);
+    const unsigned currentDayNumber = static_cast<unsigned>(cal.day());
+    cal = cal.year() / cal.month() / 1_d;
+    unsigned requiredDayNumber = m_dayNumber;
+    if (requiredDayNumber < currentDayNumber)
+        cal += months(1);
+
+    const months diff(m_frequency);
+    for (unsigned occurrenceIndex = 0; occurrenceIndex < dates.size(); ++occurrenceIndex) {
+        cal = normalize(cal);
+        month mon = cal.month();
+        cal = normalize(cal.year() / cal.month() / day(requiredDayNumber));
+        if (cal.month() != mon)
+            cal = normalize(cal.year() / cal.month() / day(0));
+        dates[occurrenceIndex] = cal;
+        cal = cal.year() / cal.month() / 1_d;
+        cal += months(m_frequency);
+    }
 }
