@@ -16,6 +16,7 @@ namespace mpxjpp {
 
 class ProjectFile;
 class Task;
+class Resource;
 
 class ResourceAssignmentWorkgroupFields final {
 private:
@@ -62,11 +63,25 @@ public:
     const ResourceAssignmentWorkgroupFields &workgroupAssignment() const {
         return m_workgroup;
     }
+
     // Task getTask(); #449
     // Resource getResource(); #464
     // void remove(); #492
-    // List<TimephasedWork> getTimephasedActualWork(); #543
-    // void setTimephasedActualWork(TimephasedWorkContainer data); #554
+
+    const TimephasedWorkContainer::data_type *timephasedActualWork() const {
+        return (m_timephasedActualWork ? &m_timephasedActualWork->data() : nullptr);
+    }
+    void set_timephasedActualWork(std::unique_ptr<TimephasedWorkContainer> &&data) {
+        m_timephasedActualWork = std::move(data);
+    }
+
+    // getTimephasedWork(); #565
+    // setTimephasedWork; #576
+    // List<TimephasedWork> getTimephasedOvertimeWork(); #587
+
+    void set_timephasedActualOvertimeWork(std::unique_ptr<TimephasedWorkContainer> &&data) {
+        m_timephasedActualOvertimeWork = std::move(data);
+    }
 
     using Date = common::DateTime;
 
@@ -96,6 +111,22 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(remainingWork, Duration, REMAINING_WORK)
     MPXJPP_FIELD_GETTER_SETTER(levelingDelay, Duration, LEVELING_DELAY)
 
+    MPXJPP_FIELD_GETTER_SETTER(variableRateUnits, TimeUnit, VARIABLE_RATE_UNITS)
+    MPXJPP_FIELD_GETTER_SETTER(taskUniqueID, int, TASK_UNIQUE_ID)
+    MPXJPP_FIELD_GETTER_SETTER(budgetCost, double, BUDGET_COST)
+    MPXJPP_FIELD_GETTER_SETTER(budgetWork, Duration, BUDGET_WORK)
+    MPXJPP_FIELD_GETTER_SETTER(baselineBudgetCost, double, BASELINE_BUDGET_COST)
+    MPXJPP_FIELD_GETTER_SETTER(baselineBudgetWork, Duration, BASELINE_BUDGET_WORK)
+    double baselineCost(unsigned baselineNumber) {
+        if (baselineNumber < 1 || baselineNumber > 10)
+            throw std::invalid_argument("baselineNumber should be int range [1,10]");
+        return getCachedValue(AssignmentField(AssignmentField::BASELINE1_COST + (baselineNumber - 1))).cast<double>();
+    }
+    void set_baselineCost(unsigned baselineNumber, double value) {
+        if (baselineNumber < 1 || baselineNumber > 10)
+            throw std::invalid_argument("baselineNumber should be int range [1,10]");
+        set(AssignmentField(AssignmentField::BASELINE1_COST + (baselineNumber - 1)), value);
+    }
 #undef FIELDTYPE_CLASS
 };
 
