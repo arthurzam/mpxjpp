@@ -27,7 +27,7 @@ CustomField &CustomFieldContainer::getCustomField(FieldType field) {
 
 CustomFieldValueItem *CustomFieldContainer::getCustomFieldValueItemByUniqueID(int uniqueID) {
     for (CustomFieldValueItem *element : m_valueMap)
-        if (element->uniqueID() == uniqueID)
+        if (element->uniqueID == uniqueID)
             return element;
     return nullptr;
 }

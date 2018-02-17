@@ -37,7 +37,7 @@ public:
      */
     DateRange get(size_type n) const noexcept {
         if (n < size())
-            return *(this->_M_impl._M_start + n);
+            return (*this)[n];
         else
             return DateRange();
     }

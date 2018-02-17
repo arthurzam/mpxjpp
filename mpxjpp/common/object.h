@@ -157,6 +157,8 @@ private:
     const anyimpl::base_any_policy* policy = anyimpl::get_policy<empty_any>();
     void* object = nullptr;
 
+    template <typename T>
+    static constexpr bool is_any = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, any>::value;
 public:
     template <typename T, std::size_t N>
     any(const std::array<T, N>& x) {
@@ -166,6 +168,7 @@ public:
     /// Initializing constructor.
     template <typename T>
     any(const T& x) {
+        static_assert(!is_any<T>, "a");
         assign(x);
     }
 
@@ -209,8 +212,8 @@ public:
 
     /// Assignment function.
     template <typename T>
-    any& assign(const T& x) {
-        static_assert(!std::is_same<T, any>::value, "this function shouldn't be called with any");
+    any &assign(const T& x) {
+        static_assert(!is_any<T>, "this function shouldn't be called with any");
         reset();
         policy = anyimpl::get_policy<T>();
         policy->copy_from_value(&x, &object);
@@ -218,7 +221,7 @@ public:
     }
 
     /// Assignment operator.
-    template<typename T, std::enable_if_t<!std::is_same<T, any>::value>>
+    template<typename T, std::enable_if_t<!(is_any<T>)>>
     any& operator=(const T& x) {
         return assign<T>(x);
     }

@@ -58,8 +58,6 @@ public:
 
     MPXJPP_GETTER_SETTER(customProperties, const CustomProperties &)
 
-    using Date = common::DateTime;
-
 #define FIELDTYPE_CLASS ProjectField
     MPXJPP_FIELD_GETTER_SETTER(defaultDurationUnits, TimeUnit, DEFAULT_DURATION_UNITS)
     MPXJPP_FIELD_GETTER_SETTER(defaultDurationIsFixed, bool, DEFAULT_DURATION_IS_FIXED)
@@ -70,27 +68,27 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(splitInProgressTasks, bool, SPLIT_IN_PROGRESS_TASKS)
     MPXJPP_FIELD_GETTER_SETTER(dateOrder, DateOrder, DATE_ORDER)
     MPXJPP_FIELD_GETTER_SETTER(timeFormat, ProjectTimeFormat, TIME_FORMAT)
-    MPXJPP_FIELD_GETTER_SETTER(defaultStartTime, Date, DEFAULT_START_TIME)
+    MPXJPP_FIELD_GETTER_SETTER(defaultStartTime, common::DateTime, DEFAULT_START_TIME)
     MPXJPP_FIELD_GETTER_SETTER(dateSeparator, char, DATE_SEPARATOR)
     MPXJPP_FIELD_GETTER_SETTER(timeSeparator, char, TIME_SEPARATOR)
     MPXJPP_FIELD_GETTER_SETTER(amText, const std::string &, AM_TEXT)
     MPXJPP_FIELD_GETTER_SETTER(pmText, const std::string &, PM_TEXT)
     MPXJPP_FIELD_GETTER_SETTER(dateFormat, ProjectDateFormat, DATE_FORMAT)
     MPXJPP_FIELD_GETTER_SETTER(barTextDateFormat, ProjectDateFormat, BAR_TEXT_DATE_FORMAT)
-    MPXJPP_FIELD_GETTER_SETTER(defaultEndTime, Date, DEFAULT_END_TIME)
+    MPXJPP_FIELD_GETTER_SETTER(defaultEndTime, common::DateTime, DEFAULT_END_TIME)
     MPXJPP_FIELD_GETTER_SETTER(projectTitle, const std::string &, PROJECT_TITLE)
     MPXJPP_FIELD_GETTER_SETTER(company, const std::string &, COMPANY)
     MPXJPP_FIELD_GETTER_SETTER(manager, const std::string &, MANAGER)
 
     void set_defaultCalendarName(const std::string &calendarName);
     MPXJPP_FIELD_GETTER(defaultCalendarName, const std::string &, DEFAULT_CALENDAR_NAME)
-    MPXJPP_FIELD_SETTER(startDate, Date, START_DATE)
-    MPXJPP_FIELD_SETTER(finishDate, Date, FINISH_DATE)
-    Date startDate() const;
-    Date finishDate() const;
+    MPXJPP_FIELD_SETTER(startDate, common::DateTime, START_DATE)
+    MPXJPP_FIELD_SETTER(finishDate, common::DateTime, FINISH_DATE)
+    common::DateTime startDate() const;
+    common::DateTime finishDate() const;
 
     MPXJPP_FIELD_GETTER_SETTER(scheduleFrom, ScheduleFrom, SCHEDULE_FROM)
-    MPXJPP_FIELD_GETTER_SETTER(currentDate, Date, CURRENT_DATE)
+    MPXJPP_FIELD_GETTER_SETTER(currentDate, common::DateTime, CURRENT_DATE)
     MPXJPP_FIELD_GETTER_SETTER(comments, const std::string &, COMMENTS)
     MPXJPP_FIELD_GETTER_SETTER(cost, double, COST)
     MPXJPP_FIELD_GETTER_SETTER(baselineCost, double, BASELINE_COST)
@@ -103,10 +101,10 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(baselineDuration, Duration, BASELINE_DURATION)
     MPXJPP_FIELD_GETTER_SETTER(actualDuration, Duration, ACTUAL_DURATION)
     MPXJPP_FIELD_GETTER_SETTER(percentComplete, double, PERCENTAGE_COMPLETE)
-    MPXJPP_FIELD_GETTER_SETTER(baselineStart, Date, BASELINE_START)
-    MPXJPP_FIELD_GETTER_SETTER(baselineFinish, Date, BASELINE_FINISH)
-    MPXJPP_FIELD_GETTER_SETTER(actualStart, Date, ACTUAL_START)
-    MPXJPP_FIELD_GETTER_SETTER(actualFinish, Date, ACTUAL_FINISH)
+    MPXJPP_FIELD_GETTER_SETTER(baselineStart, common::DateTime, BASELINE_START)
+    MPXJPP_FIELD_GETTER_SETTER(baselineFinish, common::DateTime, BASELINE_FINISH)
+    MPXJPP_FIELD_GETTER_SETTER(actualStart, common::DateTime, ACTUAL_START)
+    MPXJPP_FIELD_GETTER_SETTER(actualFinish, common::DateTime, ACTUAL_FINISH)
     MPXJPP_FIELD_GETTER_SETTER(startVariance, Duration, START_VARIANCE)
     MPXJPP_FIELD_GETTER_SETTER(finishVariance, Duration, FINISH_VARIANCE)
 
@@ -139,8 +137,8 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(spreadActualCost, bool, SPREAD_ACTUAL_COST)
     MPXJPP_FIELD_GETTER_SETTER(multipleCriticalPaths, bool, MULTIPLE_CRITICAL_PATHS)
     MPXJPP_FIELD_GETTER_SETTER(autoAddNewResourcesAndTasks, bool, AUTO_ADD_NEW_RESOURCES_AND_TASKS)
-    MPXJPP_FIELD_GETTER_SETTER(lastSaved, Date, LAST_SAVED)
-    MPXJPP_FIELD_GETTER_SETTER(statusDate, Date, STATUS_DATE)
+    MPXJPP_FIELD_GETTER_SETTER(lastSaved, common::DateTime, LAST_SAVED)
+    MPXJPP_FIELD_GETTER_SETTER(statusDate, common::DateTime, STATUS_DATE)
     MPXJPP_FIELD_GETTER_SETTER(moveRemainingStartsBack, bool, MOVE_REMAINING_STARTS_BACK)
     MPXJPP_FIELD_GETTER_SETTER(autolink, bool, AUTO_LINK)
     MPXJPP_FIELD_GETTER_SETTER(microsoftProjectServerURL, bool, MICROSOFT_PROJECT_SERVER_URL)
@@ -159,9 +157,9 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(actualsInSync, bool, ACTUALS_IN_SYNC)
     MPXJPP_FIELD_GETTER_SETTER(defaultTaskType, TaskType, DEFAULT_TASK_TYPE)
     MPXJPP_FIELD_GETTER_SETTER(earnedValueMethod, EarnedValueMethod, EARNED_VALUE_METHOD)
-    MPXJPP_FIELD_GETTER_SETTER(creationDate, Date, CREATION_DATE)
+    MPXJPP_FIELD_GETTER_SETTER(creationDate, common::DateTime, CREATION_DATE)
     MPXJPP_FIELD_GETTER_SETTER(defaultFixedCostAccrual, AccrueType, DEFAULT_FIXED_COST_ACCRUAL)
-    MPXJPP_FIELD_GETTER_SETTER(extendedCreationDate, Date, EXTENDED_CREATION_DATE)
+    MPXJPP_FIELD_GETTER_SETTER(extendedCreationDate, common::DateTime, EXTENDED_CREATION_DATE)
     MPXJPP_FIELD_GETTER_SETTER(criticalSlackLimit, int, CRITICAL_SLACK_LIMIT)
     MPXJPP_FIELD_GETTER_SETTER(baselineForEarnedValue, int, BASELINE_FOR_EARNED_VALUE)
     MPXJPP_FIELD_GETTER_SETTER(fiscalYearStartMonth, int, FISCAL_YEAR_START_MONTH)
@@ -173,13 +171,13 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(hyperlinkBase, const std::string &, HYPERLINK_BASE)
     MPXJPP_FIELD_GETTER_SETTER(showProjectSummaryTask, bool, SHOW_PROJECT_SUMMARY_TASK)
 
-    MPXJPP_FIELD_GETTER_SETTER(baselineDate, Date, BASELINE_DATE)
-    Date baselineDate(unsigned baselineNumber) {
+    MPXJPP_FIELD_GETTER_SETTER(baselineDate, common::DateTime, BASELINE_DATE)
+    common::DateTime baselineDate(unsigned baselineNumber) {
         if (baselineNumber < 1 || baselineNumber > 10)
             throw std::invalid_argument("baselineNumber should be int range [1,10]");
-        return getCachedValue(ProjectField(ProjectField::BASELINE1_DATE + (baselineNumber - 1))).cast<Date>();
+        return getCachedValue(ProjectField(ProjectField::BASELINE1_DATE + (baselineNumber - 1))).cast<common::DateTime>();
     }
-    void set_baselineDate(int baselineNumber, Date value) {
+    void set_baselineDate(int baselineNumber, common::DateTime value) {
         if (baselineNumber < 1 || baselineNumber > 10)
             throw std::invalid_argument("baselineNumber should be int range [1,10]");
         set(ProjectField(ProjectField::BASELINE1_DATE + (baselineNumber - 1)), value);
@@ -187,7 +185,7 @@ public:
 
     MPXJPP_FIELD_GETTER_SETTER(fileTemplate, const std::string &, TEMPLATE)
     MPXJPP_FIELD_GETTER_SETTER(lastAuthor, const std::string &, LAST_AUTHOR)
-    MPXJPP_FIELD_GETTER_SETTER(lastPrinted, Date, LAST_PRINTED)
+    MPXJPP_FIELD_GETTER_SETTER(lastPrinted, common::DateTime, LAST_PRINTED)
     MPXJPP_FIELD_GETTER_SETTER(shortApplicationName, const std::string &, SHORT_APPLICATION_NAME)
     MPXJPP_FIELD_GETTER_SETTER(editingTime, int, EDITING_TIME)
     MPXJPP_FIELD_GETTER_SETTER(presentationFormat, const std::string &, PRESENTATION_FORMAT)

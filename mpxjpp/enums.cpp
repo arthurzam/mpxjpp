@@ -8,7 +8,6 @@
 #include "listwithcallbacks.h"
 
 constexpr const char *mpxjpp::TimeUnit::strs[];
-constexpr const char *mpxjpp::RelationType::strs[];
 
 
 namespace std {

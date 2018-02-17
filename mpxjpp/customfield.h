@@ -11,25 +11,13 @@
 
 namespace mpxjpp {
 
-class CustomFieldValueItem final {
-private:
-    int m_uniqueID;
-    common::UUID m_guid;
-    common::any m_value;
-    std::string m_description;
-    std::vector<uint8_t> m_unknown;
-    int m_parent;
-public:
-    CustomFieldValueItem(int uniqueID) :
-        m_uniqueID(uniqueID)
-    { }
-
-    MPXJPP_GETTER(uniqueID, int)
-    MPXJPP_GETTER_SETTER(value, const common::any &)
-    MPXJPP_GETTER_SETTER(description, const std::string &)
-    MPXJPP_GETTER_SETTER(unknown, const std::vector<uint8_t> &)
-    MPXJPP_GETTER_SETTER(parent, int)
-    MPXJPP_GETTER_SETTER(guid, common::UUID)
+struct CustomFieldValueItem final {
+    int uniqueID;
+    common::UUID guid;
+    common::any value;
+    std::string description;
+    std::vector<uint8_t> unknown;
+    int parent;
 };
 
 class CustomFieldContainer;

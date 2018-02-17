@@ -63,7 +63,7 @@ public:
         TS_ASSERT_EQUALS(b.cast<double>(), 7.0);
         a = std::move(b);
         TS_ASSERT_EQUALS(a.cast<double>(), 7.0);
-        TS_ASSERT(b.empty());
+        TS_ASSERT_EQUALS(b.cast<const char *>(), std::string("hello world"));
     }
 
     void testSwap() {
@@ -87,12 +87,14 @@ public:
         TS_ASSERT_EQUALS(b.cast<int>(), 6);
 
         any c(std::move(a));
+        TS_ASSERT(a.empty());
         TS_ASSERT_EQUALS(b.cast<int>(), 6);
         TS_ASSERT_EQUALS(c.cast<int>(), 6);
-        TS_ASSERT(a.empty());
     }
 
     void testCompareTo() {
+        TS_ASSERT(any().compareTo(any()) == 0);
+
         TS_TRACE("comparing integers");
         any a(6), b(5), c(7), d(6);
         TS_ASSERT(a.compareTo(b) > 0);
@@ -110,7 +112,12 @@ public:
         TS_ASSERT_EQUALS(s1.cast<std::string>(), std::string("a"));
         TS_ASSERT(s1.compareTo(s2) < 0);
         TS_ASSERT(s2.compareTo(s3) < 0);
+        TS_ASSERT(s3.compareTo(s1) > 0);
         TS_ASSERT(s1.compareTo(s1) == 0);
+
+        TS_TRACE("testing throwing comparing");
+        any v1(std::vector<int>{1, 2}), v2(std::vector<int>{2, 3});
+        TS_ASSERT_THROWS(v1.compareTo(v2), std::invalid_argument);
     }
 
     void testCalendarCast() {
