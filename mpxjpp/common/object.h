@@ -17,6 +17,9 @@ struct bad_any_cast
 
 namespace anyimpl {
 
+    template<typename... Ts> struct make_void { typedef void type;};
+    template<typename... Ts> using void_t = typename make_void<Ts...>::type;
+
     template<typename _Tp> using remove_ref_cv_t = std::remove_cv_t<std::remove_reference_t<_Tp>>;
 
     /**
@@ -54,18 +57,8 @@ namespace anyimpl {
         }
     };
 
-    template <typename T>
-    struct has_compareTo_method
-    {
-        template <typename C> static auto test(T * p) -> decltype(std::declval<C>().compareTo(*p), std::true_type());
-
-        template <typename> static std::false_type test(...);
-
-        typedef decltype(test<T>(nullptr)) type;
-        static constexpr bool value = std::is_same<std::true_type, decltype(test<T>(nullptr))>::value;
-    };
     template<typename T>
-    struct compare_to<T, std::enable_if_t<has_compareTo_method<T>::value>> {
+    struct compare_to<T, void_t<decltype(std::declval<T>().compareTo(std::declval<T>()))>> {
         static constexpr int type = 3;
         int operator()(const T &a, const T &b) const {
             return a.compareTo(b);
@@ -123,18 +116,12 @@ namespace anyimpl {
 
     template<typename T>
     struct choose_policy {
+        static_assert(!std::is_same<T, any>::value, "Choosing the policy for an any type is illegal");
+
         using __cleaned_type = remove_ref_cv_t<T>;
         using type = typename std::conditional_t<std::is_pointer<T>::value, small_any_policy<void *>,
                               std::conditional_t<is_small<T>, small_any_policy<__cleaned_type>,
                                                                 big_any_policy<__cleaned_type>>>;
-    };
-
-
-    /// Choosing the policy for an any type is illegal, but should never happen.
-    /// This is designed to throw a compiler error.
-    template<>
-    struct choose_policy<any> {
-        using type = void;
     };
 
     static_assert(choose_policy<int>::type::is_small_policy, "a");
@@ -149,6 +136,8 @@ namespace anyimpl {
         return &policy;
     }
 }
+
+
 
 struct any final
 {

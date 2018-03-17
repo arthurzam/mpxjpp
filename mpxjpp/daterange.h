@@ -22,7 +22,7 @@ struct DateRange final {
      * @param date target date
      * @return comparison result
      */
-    constexpr int compareTo(common::DateTime date) {
+    constexpr int compareTo(common::DateTime date) const {
         if (date < start)
             return -1;
         if (date > end)
@@ -30,7 +30,7 @@ struct DateRange final {
         return 0;
     }
 
-    constexpr int compareTo(const DateRange &other) {
+    constexpr int compareTo(const DateRange &other) const {
         int result = (start - other.start).count();
         if (result == 0)
             result = (other.end - end).count();

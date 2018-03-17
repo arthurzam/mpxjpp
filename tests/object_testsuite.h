@@ -115,6 +115,19 @@ public:
         TS_ASSERT(s3.compareTo(s1) > 0);
         TS_ASSERT(s1.compareTo(s1) == 0);
 
+        TS_TRACE("testing custom compareTo");
+        struct custom_compareTo {
+            int m_n = 0;
+
+            int compareTo(custom_compareTo o) const {
+                return o.m_n - m_n; // reverse order
+            }
+        };
+        any c1(custom_compareTo{0}), c2(custom_compareTo{1}), c3(custom_compareTo{2});
+        TS_ASSERT(c1.compareTo(c2) > 0);
+        TS_ASSERT(c1.compareTo(c3) > 0);
+        TS_ASSERT(c3.compareTo(c2) < 0);
+
         TS_TRACE("testing throwing comparing");
         any v1(std::vector<int>{1, 2}), v2(std::vector<int>{2, 3});
         TS_ASSERT_THROWS(v1.compareTo(v2), std::invalid_argument);

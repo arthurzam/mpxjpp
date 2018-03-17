@@ -13,7 +13,8 @@ INCLUDEPATH += $$PWD/../
 HEADERS += \
     object_testsuite.h \
     listwithcallbacks_testsuite.h \
-    daterange_testsuite.h
+    daterange_testsuite.h \
+    sized_array_testsuite.h
 
 TEST_HEADERS = $$find(HEADERS, .*testsuite.h)
 

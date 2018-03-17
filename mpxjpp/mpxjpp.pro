@@ -64,7 +64,8 @@ HEADERS += \
     customfield.h \
     common/uuid.h \
     projectfile.h \
-    mpp/mpputility.h
+    mpp/mpputility.h \
+    common/sized_array.h
 
 QMAKE_CXXFLAGS_RELEASE += -Wpedantic -Wextra
 #QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin
