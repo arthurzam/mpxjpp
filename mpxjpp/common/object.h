@@ -16,6 +16,9 @@ struct bad_any_cast
 { };
 
 namespace anyimpl {
+
+    template<typename _Tp> using remove_ref_cv_t = std::remove_cv_t<std::remove_reference_t<_Tp>>;
+
     /**
      * is_small type trait
      *
@@ -120,7 +123,7 @@ namespace anyimpl {
 
     template<typename T>
     struct choose_policy {
-        using __cleaned_type = std::remove_cv_t<std::remove_reference_t<T>>;
+        using __cleaned_type = remove_ref_cv_t<T>;
         using type = typename std::conditional_t<std::is_pointer<T>::value, small_any_policy<void *>,
                               std::conditional_t<is_small<T>, small_any_policy<__cleaned_type>,
                                                                 big_any_policy<__cleaned_type>>>;
@@ -158,7 +161,7 @@ private:
     void* object = nullptr;
 
     template <typename T>
-    static constexpr bool is_any = std::is_same<std::remove_cv_t<std::remove_reference_t<T>>, any>::value;
+    static constexpr bool is_any = std::is_same<anyimpl::remove_ref_cv_t<T>, any>::value;
 public:
     template <typename T, std::size_t N>
     any(const std::array<T, N>& x) {
@@ -306,7 +309,7 @@ public:
 template<typename T, typename = void>
 struct any_type_cast {
     using type = T;
-    using castType = std::remove_cv_t<std::remove_reference_t<T>>;
+    using castType = anyimpl::remove_ref_cv_t<T>;
 
     static type get(const any &a, std::add_lvalue_reference_t<std::add_const_t<castType>> def) {
         return static_cast<type>(a.cast<castType>(def));
