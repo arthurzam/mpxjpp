@@ -39,7 +39,7 @@ public:
         any obj;
         TS_ASSERT_EQUALS(obj.cast<int>(2), 2);
         TS_ASSERT_EQUALS(obj.cast<double>(2.0), 2.0);
-        TS_ASSERT_EQUALS(obj.cast<const char *>("a"), std::string("a"));
+        TS_ASSERT_EQUALS(obj.cast<const char *>("a"), "a");
     }
 
     void testAssignContinues() {

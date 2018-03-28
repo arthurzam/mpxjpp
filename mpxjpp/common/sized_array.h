@@ -1,6 +1,7 @@
 #ifndef SIZED_ARRAY_H
 #define SIZED_ARRAY_H
-#include <exception>
+
+#include <stdexcept>
 #include <type_traits>
 
 namespace mpxjpp {

@@ -47,6 +47,20 @@ public:
         delete ptr;
     }
 
+    void testAllocateCStringVector() {
+        using mpxjpp::common::sized_array;
+
+        std::vector<const char *> vec{"a", "b", "c"};
+        sized_array<const char *> *ptr = new (vec) sized_array<const char *>(vec);
+        sized_array<const char *> &ref = *ptr;
+        TS_ASSERT_EQUALS(ref[0], "a");
+        TS_ASSERT_EQUALS(ref[1], "b");
+        TS_ASSERT_EQUALS(ref[2], "c");
+        ptr->emplace(1, "d");
+        TS_ASSERT_EQUALS(ref[1], "d");
+        delete ptr;
+    }
+
     void testCopyAllocate() {
         using mpxjpp::common::sized_array;
 
