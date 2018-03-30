@@ -111,10 +111,10 @@ ProjectProperties::ProjectProperties(ProjectFile &mpx) :
 }
 
 void ProjectProperties::set_defaultCalendarName(const std::string &calendarName) {
-    set(ProjectField(ProjectField::DEFAULT_CALENDAR_NAME),
+    _field_set(ProjectField::DEFAULT_CALENDAR_NAME,
         std::move(!calendarName.empty() ? calendarName : DEFAULT_CALENDAR_NAME));
 }
 
 void ProjectProperties::set_currencySymbol(const std::string &currencySymbol) {
-    set(ProjectField(ProjectField::CURRENCY_SYMBOL), currencySymbol.empty() ? DEFAULT_CURRENCY_SYMBOL : currencySymbol);
+    _field_set(ProjectField::CURRENCY_SYMBOL, currencySymbol.empty() ? DEFAULT_CURRENCY_SYMBOL : currencySymbol);
 }

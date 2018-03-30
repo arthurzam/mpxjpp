@@ -175,12 +175,12 @@ public:
     common::DateTime baselineDate(unsigned baselineNumber) {
         if (baselineNumber < 1 || baselineNumber > 10)
             throw std::invalid_argument("baselineNumber should be int range [1,10]");
-        return getCachedValue(ProjectField(ProjectField::BASELINE1_DATE + (baselineNumber - 1))).cast<common::DateTime>();
+        return _field_get<common::DateTime>(ProjectField::BASELINE1_DATE + (baselineNumber - 1));
     }
     void set_baselineDate(int baselineNumber, common::DateTime value) {
         if (baselineNumber < 1 || baselineNumber > 10)
             throw std::invalid_argument("baselineNumber should be int range [1,10]");
-        set(ProjectField(ProjectField::BASELINE1_DATE + (baselineNumber - 1)), value);
+        _field_set(ProjectField::BASELINE1_DATE + (baselineNumber - 1), value);
     }
 
     MPXJPP_FIELD_GETTER_SETTER(fileTemplate, const std::string &, TEMPLATE)

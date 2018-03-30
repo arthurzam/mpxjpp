@@ -131,12 +131,12 @@ class Task final : public FieldContainer, public ProjectEntityWithID, public Chi
         double cost(unsigned baselineNumber) {
             if (baselineNumber < 1 || baselineNumber > 10)
                 throw std::invalid_argument("baselineNumber should be int range [1,10]");
-            return getCachedValue(TaskField(TaskField::COST1 + (baselineNumber - 1))).cast<double>();
+            return _field_get<double>(TaskField::COST1 + (baselineNumber - 1));
         }
         void set_cost(int baselineNumber, Date value) {
             if (baselineNumber < 1 || baselineNumber > 10)
                 throw std::invalid_argument("baselineNumber should be int range [1,10]");
-            set(TaskField(TaskField::COST1 + (baselineNumber - 1)), value);
+            _field_set(TaskField::COST1 + (baselineNumber - 1), value);
         }
 
 

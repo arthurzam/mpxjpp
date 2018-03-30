@@ -26,3 +26,5 @@ generate_tests.clean += ${QMAKE_FILE_OUT}
 generate_tests.variable_out = GENERATED_SOURCES
 
 QMAKE_EXTRA_COMPILERS += generate_tests
+QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin
+QMAKE_LFLAGS_RELEASE += -flto -fuse-linker-plugin

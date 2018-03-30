@@ -120,12 +120,12 @@ public:
     double baselineCost(unsigned baselineNumber) {
         if (baselineNumber < 1 || baselineNumber > 10)
             throw std::invalid_argument("baselineNumber should be int range [1,10]");
-        return getCachedValue(AssignmentField(AssignmentField::BASELINE1_COST + (baselineNumber - 1))).cast<double>();
+        return _field_get<double>(AssignmentField::BASELINE1_COST + (baselineNumber - 1));
     }
     void set_baselineCost(unsigned baselineNumber, double value) {
         if (baselineNumber < 1 || baselineNumber > 10)
             throw std::invalid_argument("baselineNumber should be int range [1,10]");
-        set(AssignmentField(AssignmentField::BASELINE1_COST + (baselineNumber - 1)), value);
+        _field_set(AssignmentField::BASELINE1_COST + (baselineNumber - 1), value);
     }
 #undef FIELDTYPE_CLASS
 };

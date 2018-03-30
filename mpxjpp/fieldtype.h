@@ -144,8 +144,13 @@ protected:
      * @param value field value
      */
     template <typename T>
-    void set(const FieldType &field, T value) {
-        common::any_type_cast<T>::set(m_array[field.m_value], value);
+    void _field_set(int field, T value) {
+        common::any_type_cast<T>::set(m_array[field], value);
+    }
+
+    template <typename T>
+    T _field_get(int field) const {
+        return common::any_type_cast<T>::get(m_array[field], {});
     }
 public:
     virtual ~FieldContainer() {
@@ -184,12 +189,12 @@ public:
 
 #define MPXJPP_FIELD_GETTER(varName, type, field) \
     type varName() const { \
-        return common::any_type_cast<type>::get(getCachedValue(FIELDTYPE_CLASS(FIELDTYPE_CLASS::field)), {}); \
+        return _field_get<type>((FIELDTYPE_CLASS::field)); \
     }
 
 #define MPXJPP_FIELD_SETTER(varName, type, field) \
     void set_##varName(type varName) { \
-        set<type>(FIELDTYPE_CLASS(FIELDTYPE_CLASS::field), varName); \
+        _field_set<type>((FIELDTYPE_CLASS::field), varName); \
     }
 
 #define MPXJPP_FIELD_GETTER_SETTER(varName, type, field) \

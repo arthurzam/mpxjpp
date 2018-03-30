@@ -2,6 +2,7 @@
 #define STRUTILS_H
 
 #include <string>
+#include <algorithm>
 
 namespace mpxjpp {
 namespace common {
