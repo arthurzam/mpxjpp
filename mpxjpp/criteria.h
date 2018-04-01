@@ -87,11 +87,11 @@ public:
     MPXJPP_GETTER_SETTER(leftValue, FieldType)
     MPXJPP_GETTER_SETTER(testOperator, TestOperator)
 
-    const common::any &getValue(int index) const {
+    const common::any &getValue(unsigned index) const {
         return (m_definedRightValues[index]);
     }
 
-    void setRightValue(int index, common::any value);
+    void setRightValue(unsigned index, const common::any &value);
 
     bool evaluate(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const;
 

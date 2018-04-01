@@ -11,48 +11,47 @@ namespace strutils = mpxjpp::common::strutils;
 
 namespace {
 
-static common::any &getSingleOperand(common::any &operand) {
+static const common::any &getSingleOperand(const common::any &operand) {
     if (operand.isType<std::vector<common::any>>()) {
         return operand.cast<std::vector<common::any>>()[0];
     }
     return operand;
 }
 
-static int evaluateWithin(common::any &lhs, common::any &rhs) {
+static int evaluateWithin(const common::any &lhs, const common::any &rhs) {
     if (!rhs.isType<std::vector<common::any>>())
         return false;
-    std::vector<common::any> &rhsList = rhs.cast<std::vector<common::any>>();
+    const std::vector<common::any> &rhsList = rhs.cast<std::vector<common::any>>();
     bool isRhsEmpty = rhsList[0].empty() || rhsList[1].empty();
     if (lhs.empty())
         return isRhsEmpty;
-    if (!isRhsEmpty)
-        return (lhs.compareTo(rhsList[0]) >= 0 && lhs.compareTo(rhsList[1]) <= 0) ||
-               (lhs.compareTo(rhsList[0]) <= 0 && lhs.compareTo(rhsList[1]) >= 0);
+    if (!isRhsEmpty) {
+        auto r0 = lhs.compareTo(rhsList[0]);
+        auto r1 = lhs.compareTo(rhsList[1]);
+        return (r0 >= 0 && r1 <= 0) || (r0 <= 0 && r1 >= 0);
+    }
     return false;
 }
 
-static int evaluateCompareTo(common::any &lhs, common::any &rhs) {
-    common::any &r = getSingleOperand(rhs);
-    if (lhs.empty()) {
-        if (r.empty())
-            return 0;
-        else
-            return 1;
-    } else if (r.empty())
+static int evaluateCompareTo(const common::any &lhs, const common::any &rhs) {
+    const common::any &r = getSingleOperand(rhs);
+    if (lhs.empty())
+        return r.empty() ? 0 : 1;
+    else if (r.empty())
         return -1;
     else
         return lhs.compareTo(r);
 }
 
-static bool evaluateContains(common::any &lhs, common::any &rhs) {
-    common::any &r = getSingleOperand(rhs);
+static bool evaluateContains(const common::any &lhs, const common::any &rhs) {
+    const common::any &r = getSingleOperand(rhs);
     if (lhs.isType<std::string>() && r.isType<std::string>())
         return strutils::str_toupper(lhs.cast<std::string>()).find(strutils::str_toupper(r.cast<std::string>())) != std::string::npos;
     return false;
 }
 
-static bool evaluateContainsExactly(common::any &lhs, common::any &rhs) {
-    common::any &r = getSingleOperand(rhs);
+static bool evaluateContainsExactly(const common::any &lhs, const common::any &rhs) {
+    const common::any &r = getSingleOperand(rhs);
     if (lhs.isType<std::string>() && r.isType<std::string>())
         return lhs.cast<std::string>().find(r.cast<std::string>()) != std::string::npos;
     return false;
@@ -60,10 +59,7 @@ static bool evaluateContainsExactly(common::any &lhs, common::any &rhs) {
 
 }
 
-bool TestOperator::evaluate(const common::any &_lhs, const common::any &_rhs) const {
-    common::any &lhs = const_cast<common::any &>(_lhs);
-    common::any &rhs = const_cast<common::any &>(_rhs);
-
+bool TestOperator::evaluate(const common::any &lhs, const common::any &rhs) const {
     switch(m_value) {
         case IS_ANY_VALUE:
             return true;
@@ -96,21 +92,20 @@ bool TestOperator::evaluate(const common::any &_lhs, const common::any &_rhs) co
     throw std::exception(); // should not be run!
 }
 
-void GenericCriteria::setRightValue(int index, common::any value) {
+void GenericCriteria::setRightValue(unsigned index, const common::any &value) {
     m_definedRightValues[index] = value;
     if (value.isType<FieldType>())
         m_symbolicValues = true;
     else if (value.isType<Duration>()) {
         const Duration &v = value.cast<Duration>();
         if (v.units() != TimeUnit::HOURS)
-            value = v.convertUnits(TimeUnit::HOURS, m_properties);
+            m_definedRightValues[index] = v.convertUnits(TimeUnit::HOURS, m_properties);
     }
-    m_workingRightValues[index] = value;
 }
 
 bool GenericCriteria::evaluate(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const {
     if (m_testOperator == TestOperator::AND || m_testOperator == TestOperator::OR) {
-        return evaluateLogicalOperator(container, promptValues);;
+        return evaluateLogicalOperator(container, promptValues);
     }
 
     common::any lhs;
@@ -119,7 +114,7 @@ bool GenericCriteria::evaluate(FieldContainer &container, std::unordered_map<Gen
         switch (m_leftValue.dataType()) {
             case DataType::DATE:
                 if (!lhs.empty())
-                    lhs = 0; // TODO: DateHelper.getDayStartDate((Date) lhs);
+                    lhs = static_cast<int>(0); // TODO: DateHelper.getDayStartDate((Date) lhs);
                 break;
             case DataType::DURATION:
                 lhs = (!lhs.empty() ? lhs.cast<Duration>().convertUnits(TimeUnit::HOURS, m_properties) : Duration(0, TimeUnit::HOURS));
@@ -139,7 +134,7 @@ bool GenericCriteria::evaluate(FieldContainer &container, std::unordered_map<Gen
 bool GenericCriteria::evaluateLogicalOperator(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const {
     if (m_criteriaList.empty())
         return true;
-    for (const std::unique_ptr<GenericCriteria> &criteria : m_criteriaList) {
+    for (const auto &criteria : m_criteriaList) {
         bool result = criteria->evaluate(container, promptValues);
         if ((m_testOperator == TestOperator::AND && !result) || (m_testOperator == TestOperator::OR && result))
             return result;
@@ -159,7 +154,7 @@ GenericCriteria::ObjectArray GenericCriteria::processSymbolicValues(const Object
             const common::any &val = container.getCachedValue(type);
             switch (type.dataType()) {
                 case DataType::DATE:
-                    dst = val.empty() ? val : 0; // TODO: DateHelper.getDayStartDate((Date) lhs);
+                    dst = !val.empty() ? val : 0; // TODO: DateHelper.getDayStartDate((Date) lhs);
                     break;
                 case DataType::DURATION:
                     dst = (!val.empty() ? val.cast<Duration>().convertUnits(TimeUnit::HOURS, m_properties) : Duration(0, TimeUnit::HOURS));
