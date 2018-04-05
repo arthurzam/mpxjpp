@@ -6,6 +6,7 @@
 #include <exception>
 #include <vector>
 #include <type_traits>
+#include <typeinfo>
 
 namespace mpxjpp {
 namespace common {
@@ -16,15 +17,21 @@ struct bad_any_cast
 { };
 
 namespace anyimpl {
-
     template<typename _Tp> using remove_ref_cv_t = std::remove_cv_t<std::remove_reference_t<_Tp>>;
+
+    union storage_union {
+        using stack_storage_t = typename std::aligned_storage<sizeof(void *), std::alignment_of<void *>::value>::type;
+
+        void           *dynamic;
+        stack_storage_t stack;
+    };
 
     /**
      * is_small type trait
      *
      * Checks if T is small. Enables stack memmory inside any object
      */
-    template <typename T> constexpr bool is_small = (sizeof(T) <= sizeof(void *));
+    template <typename T> constexpr bool is_small = (sizeof(T) <= sizeof(storage_union::stack_storage_t));
 
     /**
      * compare_to type trait
@@ -72,93 +79,110 @@ namespace anyimpl {
         }
     };
 
-    /**
-     * is_movable type trait
-     *
-     * Checks if IS_MOVABLE is defined and is a true value.
-     * This flag enables the any object to memcpy the memmory of the object.
-     */
-    template<typename T, typename = void>
-    constexpr bool is_movable = std::is_trivial<T>::value;
-
-    template <typename T>
-    constexpr bool is_movable<T, std::enable_if_t<T::IS_MOVABLE>> = true;
-
-    struct base_any_policy {
-        virtual void static_delete(void** x) const = 0;
-        virtual void copy_from_value(void const* src, void** dest) const = 0;
-        virtual void clone(void* const* src, void** dest) const = 0;
-        virtual void* get_value(void** src) const = 0;
-        virtual int compareTo(void* const* x, void* const* y) const = 0;
+    template<> struct compare_to<std::nullptr_t> {
+        static constexpr int type = 4;
+        int operator()(std::nullptr_t, std::nullptr_t) const noexcept {
+            return 0;
+        }
     };
 
-    template<typename T>
-    struct small_any_policy final : base_any_policy {
-        static_assert(sizeof(T) <= sizeof(void *), "not appropriate for small_any_policy");
-        static constexpr bool is_small_policy = true;
+    struct vtable {
+        const std::type_info &(*type)();
+        void(*destroy)(storage_union &);
+        void(*copy)(const storage_union &src, storage_union &dst);
+        int (*compareTo)(const storage_union &a, const storage_union &b);
 
-        virtual void static_delete(void**) const override { }
-        virtual void copy_from_value(void const* src, void** dest) const override
-            { new(dest) T(*reinterpret_cast<T const*>(src)); }
-        virtual void clone(void* const* src, void** dest) const override { *dest = *src; }
-        virtual void* get_value(void** src) const override { return reinterpret_cast<void*>(src); }
-        virtual int compareTo(void* const* x, void* const* y) const override
-            { return compare_to<T>()(*(reinterpret_cast<T const*>(x)), *(reinterpret_cast<T const*>(y))); }
+        template <typename T>
+        static const std::type_info &get_type() {
+            return typeid(T);
+        }
     };
 
-    template<typename T>
-    struct big_any_policy final : base_any_policy {
-        static constexpr bool is_small_policy = false;
+    template <typename T> struct vtable_dynamic {
+        static void destroy(storage_union &storage) {
+            delete reinterpret_cast<T *>(storage.dynamic);
+        }
 
-        virtual void static_delete(void** x) const override { if (*x) {
-            delete(*reinterpret_cast<T**>(x)); } *x = NULL; }
-        virtual void copy_from_value(void const* src, void** dest) const override {
-           *dest = new T(*reinterpret_cast<T const*>(src)); }
-        virtual void clone(void* const* src, void** dest) const override {
-           *dest = new T(**reinterpret_cast<T* const*>(src)); }
-        virtual void* get_value(void** src) const override { return *src; }
-        virtual int compareTo(void* const* x, void* const* y) const override
-            { return compare_to<T>()(*(reinterpret_cast<T const*>(*x)), *(reinterpret_cast<T const*>(*y))); }
+        static void copy(const storage_union &src, storage_union &dst) {
+            dst.dynamic = new T(get_value(src));
+        }
+
+        static int compareTo(const storage_union &a, const storage_union &b) {
+            return compare_to<T>()(get_value(a), get_value(b));
+        }
+
+        inline static T &get_value(storage_union &storage) noexcept {
+            return *reinterpret_cast<T *>(storage.dynamic);
+        }
+        inline static const T &get_value(const storage_union &storage) noexcept {
+            return *reinterpret_cast<const T *>(storage.dynamic);
+        }
+
+        template <typename ValueType>
+        inline static void init(storage_union &storage, ValueType &&value) {
+            storage.dynamic = new T(std::forward<ValueType>(value));
+        }
+    };
+
+    template <typename T> struct vtable_stack {
+        static_assert (is_small<T>, "T should be a small object");
+
+        static void destroy(storage_union &storage) {
+            reinterpret_cast<T *>(&storage.stack)->~T();
+        }
+
+        static void copy(const storage_union &src, storage_union &dst) {
+            new (&dst.stack) T(get_value(src));
+        }
+
+        static int compareTo(const storage_union &a, const storage_union &b) {
+            return compare_to<T>()(get_value(a), get_value(b));
+        }
+
+        inline static T &get_value(storage_union &storage) noexcept {
+            return reinterpret_cast<T &>(storage.stack);
+        }
+        inline static const T &get_value(const storage_union &storage) noexcept {
+            return reinterpret_cast<const T &>(storage.stack);
+        }
+
+        template <typename ValueType>
+        inline static void init(storage_union &storage, ValueType &&value) {
+            new (&storage.stack) T(std::forward<ValueType>(value));
+        }
     };
 
     template<typename T>
     struct choose_policy {
         using __cleaned_type = remove_ref_cv_t<T>;
-        using type = typename std::conditional_t<std::is_pointer<T>::value, small_any_policy<void *>,
-                              std::conditional_t<is_small<T>, small_any_policy<__cleaned_type>,
-                                                                big_any_policy<__cleaned_type>>>;
+        using type = typename std::conditional_t<is_small<T>, vtable_stack<__cleaned_type>,
+                                                            vtable_dynamic<__cleaned_type>>;
     };
-
-
-    /// Choosing the policy for an any type is illegal, but should never happen.
-    /// This is designed to throw a compiler error.
-    template<>
-    struct choose_policy<any> {
-        using type = void;
-    };
-
-    static_assert(choose_policy<int>::type::is_small_policy, "a");
-    static_assert(!choose_policy<std::string>::type::is_small_policy, "a");
-    static_assert(choose_policy<const char *>::type::is_small_policy &&
-                  std::is_same<choose_policy<const char *>::type, small_any_policy<void *>>::value, "a");
 
     /// This function will return a different policy for each type.
     template<typename T>
-    const base_any_policy* get_policy() noexcept {
-        static const typename choose_policy<T>::type policy;
+    const vtable* get_policy() noexcept {
+        static_assert(!std::is_same<remove_ref_cv_t<T>, any>::value, "T shouldn't be from any type");
+
+        using VType = typename choose_policy<T>::type;
+        static const vtable policy = {
+            vtable::get_type<T>, VType::destroy,
+            VType::copy, VType::compareTo
+        };
         return &policy;
     }
-}
+}  // namespace anyimpl
 
 struct any final
 {
 private:
-    struct empty_any
-    { int compareTo(const empty_any &) const { return 0; } };
-    static_assert(anyimpl::compare_to<empty_any>::type == 3, "a");
     // fields
-    const anyimpl::base_any_policy* policy = anyimpl::get_policy<empty_any>();
-    void* object = nullptr;
+
+    template <typename T>
+    using policy_type = typename anyimpl::choose_policy<T>::type;
+
+    const anyimpl::vtable* policy = anyimpl::get_policy<std::nullptr_t>();
+    anyimpl::storage_union object;
 
     template <typename T>
     static constexpr bool is_any = std::is_same<anyimpl::remove_ref_cv_t<T>, any>::value;
@@ -171,12 +195,15 @@ public:
     /// Initializing constructor.
     template <typename T>
     any(const T& x) {
-        static_assert(!is_any<T>, "a");
+        static_assert(!is_any<T>, "this function shouldn't be called with any");
         assign(x);
     }
 
     /// Empty constructor.
     any() noexcept
+    { }
+
+    explicit any(std::nullptr_t) noexcept
     { }
 
     /// Special initializing constructor for string literals.
@@ -187,7 +214,7 @@ public:
     /// Copy constructor.
     any(const any& x) :
         policy(x.policy) {
-        policy->clone(&x.object, &object);
+        policy->copy(x.object, object);
     }
 
     /// Move constructor.
@@ -197,14 +224,14 @@ public:
 
     /// Destructor.
     ~any() {
-        policy->static_delete(&object);
+        policy->destroy(object);
     }
 
     /// Assignment function from another any.
     any& assign(const any& x) {
-        reset();
+        policy->destroy(object);
         policy = x.policy;
-        policy->clone(&x.object, &object);
+        policy->copy(x.object, object);
         return *this;
     }
 
@@ -215,18 +242,18 @@ public:
 
     /// Assignment function.
     template <typename T>
-    any &assign(const T& x) {
+    auto assign(T&& x) -> std::enable_if_t<!is_any<T>, any &> {
         static_assert(!is_any<T>, "this function shouldn't be called with any");
-        reset();
-        policy = anyimpl::get_policy<T>();
-        policy->copy_from_value(&x, &object);
+        policy->destroy(object);
+        policy = anyimpl::get_policy<anyimpl::remove_ref_cv_t<T>>();
+        policy_type<T>::init(object, std::forward<T>(x));
         return *this;
     }
 
     /// Assignment operator.
     template<typename T, std::enable_if_t<!(is_any<T>)>>
-    any& operator=(const T& x) {
-        return assign<T>(x);
+    any& operator=(T&& x) {
+        return assign(std::forward<T>(x));
     }
 
     /// Assignment operator.
@@ -243,6 +270,11 @@ public:
         return assign(x);
     }
 
+    any& operator=(std::nullptr_t) {
+        reset();
+        return *this;
+    }
+
     /// Utility functions
     any& swap(any& x) noexcept {
         std::swap(policy, x.policy);
@@ -253,18 +285,16 @@ public:
     /// Cast operator. You can only cast to the original type.
     template<typename T>
     T& cast() {
-        if (policy != anyimpl::get_policy<T>())
+        if (!isType<T>())
             throw bad_any_cast();
-        T* r = reinterpret_cast<T*>(policy->get_value(&object));
-        return *r;
+        return policy_type<T>::get_value(object);
     }
 
     template<typename T>
     const T& cast() const {
-        if (policy != anyimpl::get_policy<T>())
+        if (!isType<T>())
             throw bad_any_cast();
-        T* r = reinterpret_cast<T*>(policy->get_value(const_cast<void**>(&object)));
-        return *r;
+        return policy_type<T>::get_value(object);
     }
 
     template<typename T>
@@ -276,13 +306,13 @@ public:
 
     /// Returns true if the any contains no value.
     bool empty() const noexcept {
-        return policy == anyimpl::get_policy<empty_any>();
+        return isType<std::nullptr_t>();
     }
 
     /// Frees any allocated memory, and sets the value to NULL.
     void reset() {
-        policy->static_delete(&object);
-        policy = anyimpl::get_policy<empty_any>();
+        policy->destroy(object);
+        policy = anyimpl::get_policy<std::nullptr_t>();
     }
 
     /// Returns true if the two types are the same.
@@ -293,7 +323,7 @@ public:
     int compareTo(const any &x) const {
         if (policy != x.policy)
             throw bad_any_cast();
-        return policy->compareTo(&object, &x.object);
+        return policy->compareTo(object, x.object);
     }
 
     template<typename T>
@@ -346,7 +376,7 @@ struct any_type_cast<any> {
     using set = void;
 };
 
-}
-}
+}  // namespace common
+}  // namespace mpxjpp
 
 #endif // OBJECT_H

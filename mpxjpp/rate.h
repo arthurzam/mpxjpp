@@ -8,7 +8,6 @@
 
 namespace mpxjpp {
 struct Rate final {
-    static constexpr bool IS_MOVABLE = true;
 
     double amount = 0;
     TimeUnit units = TimeUnit::MINUTES;
@@ -24,7 +23,6 @@ struct Rate final {
         return static_cast<int>(units) - static_cast<int>(other.units);
     }
 };
-static_assert(common::anyimpl::is_movable<Rate>, "Rate should be movable");
 }
 
 namespace std {

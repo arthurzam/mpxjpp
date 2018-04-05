@@ -99,17 +99,11 @@ public:
     }
 
     FieldType unitsType() const {
-        return FieldType(m_arr->fields[m_value].m_unitsType, m_arr);
+        return {m_arr->fields[m_value].m_unitsType, m_arr};
     }
 
     constexpr operator bool () const {
         return m_value != -1;
-    }
-
-    constexpr FieldType &operator =(const FieldType &o) {
-        m_value = o.m_value;
-        m_arr = o.m_arr;
-        return *this;
     }
 
     constexpr bool operator ==(const FieldType &o) {
@@ -133,7 +127,7 @@ class FieldContainer {
 private:
     common::any *m_array;
 protected:
-    FieldContainer(int size) {
+    explicit FieldContainer(unsigned size) {
         m_array = new common::any[size];
     }
 
@@ -144,12 +138,12 @@ protected:
      * @param value field value
      */
     template <typename T>
-    void _field_set(int field, T value) {
+    void _field_set(unsigned field, T value) {
         common::any_type_cast<T>::set(m_array[field], value);
     }
 
     template <typename T>
-    T _field_get(int field) const {
+    T _field_get(unsigned field) const {
         return common::any_type_cast<T>::get(m_array[field], {});
     }
 public:
@@ -201,6 +195,6 @@ public:
     MPXJPP_FIELD_GETTER(varName, type, field) \
     MPXJPP_FIELD_SETTER(varName, type, field)
 
-}
+}  // namespace mpxjpp
 
 #endif // FIELDTYPE_H

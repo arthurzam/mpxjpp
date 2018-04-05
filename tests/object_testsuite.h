@@ -30,6 +30,28 @@ public:
         TS_ASSERT_EQUALS(obj.cast<const char *>(), std::string("hello world"));
     }
 
+    void testAssignArray() {
+        std::array<std::string, 5> arr{"a", "b", "c", "d", "e"};
+        any obj(arr);
+        TS_ASSERT(!obj.empty());
+        TS_ASSERT(obj.isType<std::vector<std::string>>());
+        auto &ref = obj.cast<std::vector<std::string>>();
+        TS_ASSERT_EQUALS(ref[0], "a");
+        TS_ASSERT_EQUALS(ref[2], "c");
+        TS_ASSERT_EQUALS(ref[4], "e");
+    }
+
+    void testAssignNullptr() {
+        any obj(nullptr);
+        TS_ASSERT(obj.empty());
+        TS_ASSERT(obj.compareTo(any()) == 0);
+
+        any ass(1);
+        TS_ASSERT_EQUALS(ass.cast<int>(), 1);
+        ass = nullptr;
+        TS_ASSERT(ass.empty());
+    }
+
     void testBadCast() {
         any obj(2);
         TS_ASSERT_THROWS(obj.cast<double>(), mpxjpp::common::bad_any_cast);
