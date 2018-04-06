@@ -98,8 +98,7 @@ void GenericCriteria::setRightValue(unsigned index, const common::any &value) {
         m_symbolicValues = true;
     else if (value.isType<Duration>()) {
         const Duration &v = value.cast<Duration>();
-        if (v.units() != TimeUnit::HOURS)
-            m_definedRightValues[index] = v.convertUnits(TimeUnit::HOURS, m_properties);
+        m_definedRightValues[index] = v.convertUnits(TimeUnit::HOURS, m_properties);
     }
 }
 

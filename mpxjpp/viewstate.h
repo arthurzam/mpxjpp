@@ -8,6 +8,7 @@
 
 namespace mpxjpp {
 class ProjectFile;
+class Filter;
 
 class ViewState final {
     private:
@@ -26,7 +27,7 @@ class ViewState final {
         MPXJPP_GETTER(viewName, const std::string &)
         MPXJPP_GETTER(uniqueIdList, const std::vector<int> &)
 
-        // TODO: getFilter()
+        Filter *filter() const;
 };
 
 }

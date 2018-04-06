@@ -8,6 +8,8 @@
 #include <type_traits>
 #include <typeinfo>
 
+#include "common.h"
+
 namespace mpxjpp {
 namespace common {
 
@@ -61,18 +63,8 @@ namespace anyimpl {
         }
     };
 
-    template <typename T>
-    struct has_compareTo_method
-    {
-        template <typename C> static auto test(T * p) -> decltype(std::declval<C>().compareTo(*p), std::true_type());
-
-        template <typename> static std::false_type test(...);
-
-        typedef decltype(test<T>(nullptr)) type;
-        static constexpr bool value = std::is_same<std::true_type, decltype(test<T>(nullptr))>::value;
-    };
     template<typename T>
-    struct compare_to<T, std::enable_if_t<has_compareTo_method<T>::value>> {
+    struct compare_to<T, details::void_t<decltype(std::declval<T>().compareTo(std::declval<T>()))>> {
         static constexpr int type = 3;
         int operator()(const T &a, const T &b) const {
             return a.compareTo(b);
@@ -297,8 +289,17 @@ public:
         return policy_type<T>::get_value(object);
     }
 
+    /// Assign if empty and return value. You can only cast to the original type.
     template<typename T>
-    const T& cast(const T &def) const {
+    T& get_assign(const T &def) {
+        if (empty())
+            assign(def);
+        return cast<T>();
+    }
+
+    /// Get value or the default if empty. You can only cast to the original type.
+    template<typename T>
+    const T& get(const T &def) const {
         if (empty())
             return def;
         return cast<T>();
@@ -342,7 +343,7 @@ struct any_type_cast {
     using castType = anyimpl::remove_ref_cv_t<T>;
 
     static type get(const any &a, std::add_lvalue_reference_t<std::add_const_t<castType>> def) {
-        return static_cast<type>(a.cast<castType>(def));
+        return static_cast<type>(a.get<castType>(def));
     }
 
     static void set(any &a, type var) {
@@ -359,7 +360,21 @@ struct any_type_cast<T, std::enable_if_t<std::is_enum<T>::value ||
     static_assert(sizeof(T) <= sizeof(castType), "test here for sizes");
 
     static type get(const any &a, castType def) {
-        return static_cast<type>(a.cast<castType>(def));
+        return static_cast<type>(a.get<castType>(def));
+    }
+
+    static void set(any &a, type var) {
+        a.assign<castType>(static_cast<castType>(var));
+    }
+};
+
+template<typename T>
+struct any_type_cast<T, details::void_t<typename T::ANY_TYPE_CAST>> {
+    using type = T;
+    using castType = typename T::ANY_TYPE_CAST;
+
+    static type get(const any &a, castType def) {
+        return static_cast<type>(a.get<castType>(def));
     }
 
     static void set(any &a, type var) {

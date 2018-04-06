@@ -22,6 +22,7 @@ public:
                               ELAPSED_MONTHS = 11,
                               ELAPSED_YEARS = 12,
                               ELAPSED_PERCENT = 13;
+    using ANY_TYPE_CAST = unsigned;
 private:
     static constexpr const char *strs[] = {
         "m",
@@ -42,10 +43,10 @@ private:
     unsigned m_value;
 
 public:
-    constexpr TimeUnit(int type) :
+    constexpr TimeUnit(unsigned type) :
         m_value(type)
     {}
-    constexpr explicit operator int() const {
+    constexpr explicit operator unsigned() const {
         return m_value;
     }
 
@@ -62,28 +63,12 @@ public:
     }
 };
 
-namespace common {
-template<>
-struct any_type_cast<TimeUnit> {
-    using type = TimeUnit;
-    using castType = int;
-
-    static type get(const any &a, castType def) {
-        return static_cast<type>(a.cast<castType>(def));
-    }
-
-    static void set(any &a, type var) {
-        a.assign<castType>(static_cast<castType>(var));
-    }
-};
-}
-
 }
 
 namespace std {
 
 inline std::string to_string(mpxjpp::TimeUnit val) {
-    return std::string((const char *)val);
+    return static_cast<const char *>(val);
 }
 
 }

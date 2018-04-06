@@ -42,7 +42,7 @@ class Duration final {
                 double minutesPerDay,
                 double minutesPerWeek,
                 double daysPerMonth ) {
-            switch ((int)fromUnits) {
+            switch (static_cast<unsigned>(fromUnits)) {
                 case TimeUnit::YEARS:
                     duration *= (minutesPerWeek * 52);
                     break;
@@ -72,7 +72,7 @@ class Duration final {
                     duration *= 60;
                     break;
             }
-            switch ((int)toUnits)
+            switch (static_cast<unsigned>(toUnits))
             {
                 case TimeUnit::MINUTES:
                 case TimeUnit::ELAPSED_MINUTES:
@@ -82,7 +82,7 @@ class Duration final {
                     duration /= 60;
                     break;
                 case TimeUnit::DAYS:
-                    if (minutesPerDay != 0)
+                    if (minutesPerDay != 0.0)
                         duration /= minutesPerDay;
                     else
                         duration = 0;
@@ -91,7 +91,7 @@ class Duration final {
                     duration /= (60 * 24);
                     break;
                 case TimeUnit::WEEKS:
-                    if (minutesPerWeek != 0)
+                    if (minutesPerWeek != 0.0)
                         duration /= minutesPerWeek;
                     else
                         duration = 0;
@@ -100,7 +100,7 @@ class Duration final {
                     duration /= (60 * 24 * 7);
                     break;
                 case TimeUnit::MONTHS:
-                    if (minutesPerDay != 0 && daysPerMonth != 0)
+                    if (minutesPerDay != 0.0 && daysPerMonth != 0.0)
                         duration /= (minutesPerDay * daysPerMonth);
                     else
                         duration = 0;
@@ -109,7 +109,7 @@ class Duration final {
                     duration /= (60 * 24 * 30);
                     break;
                 case TimeUnit::YEARS:
-                    if (minutesPerWeek != 0)
+                    if (minutesPerWeek != 0.0)
                         duration /= (minutesPerWeek * 52);
                     else
                         duration = 0;
@@ -128,17 +128,20 @@ class Duration final {
         }
 
         constexpr bool operator ==(const Duration &other) {
-            return m_units == other.m_units && (abs(m_duration - other.m_duration) < 0.00001);
+            return m_units == other.m_units && (std::abs(m_duration - other.m_duration) < 0.00001);
         }
 
         constexpr int compareTo(Duration rhs) const {
             if (m_units != rhs.m_units) {
                 rhs = convertUnits(rhs.m_duration, rhs.m_units, m_units, (8 * 60), (5 * 8 * 60), 20);
             }
-            return abs(m_duration - rhs.m_duration) < 0.00001 ? 0 : m_duration < rhs.m_duration ? -1 : 1;
+            return std::abs(m_duration - rhs.m_duration) < 0.00001 ? 0 : m_duration < rhs.m_duration ? -1 : 1;
         }
 
         static Duration add(Duration a, Duration b, ProjectProperties &defaults);
+        static Duration sub(Duration a, Duration b, ProjectProperties &defaults) {
+            return Duration{ a.duration() - b.convertUnits(a.units(), defaults).duration(), a.units() };
+        }
 };
 
 static_assert(std::is_polymorphic<Duration>::value == false, "Duration has vtable!");
@@ -149,7 +152,7 @@ namespace std {
 template<>
 struct hash<mpxjpp::Duration> {
     size_t operator()(const mpxjpp::Duration &val) const {
-        return static_cast<int>(val.units()) + (int)val.duration();
+        return static_cast<unsigned>(val.units()) + static_cast<unsigned>(val.duration());
     }
 };
 }

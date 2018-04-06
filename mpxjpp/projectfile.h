@@ -25,7 +25,6 @@ private:
     ProjectProperties m_properties;
     ResourceContainer *m_resources;
     TaskContainer m_tasks;
-    std::vector<TaskPtr> m_childTasks;
     ResourceAssignmentContainer *m_assignments;
     ProjectCalendarContainer m_calendars;
     TableContainer m_tables;
@@ -39,12 +38,51 @@ public:
     ProjectConfig &projectConfig() {
         return m_config;
     }
-    TaskPtr addTask() {
-        return m_tasks.add();
+    TaskPtr addTask() override {
+        return m_tasks.create();
+    }
+    void removeTask(const Task *task) {
+        auto pos = std::find_if(m_tasks.cbegin(), m_tasks.cend(), Task::FinderTask{task});
+        if (pos != m_tasks.cend())
+            m_tasks.remove(pos);
     }
     void renumberTaskIDs() {
         m_tasks.renumberIDs();
     }
+    void renumberResourceIDs() {
+        // m_resources.renumberIDs();
+    }
+
+    TaskContainer &allTasks() {
+        return m_tasks;
+    }
+
+    ProjectProperties &projectProperties() {
+        return m_properties;
+    }
+
+    ProjectCalendarPtr addDefaultBaseCalendar() {
+        return m_calendars.addDefaultBaseCalendar();
+    }
+    ProjectCalendarPtr getCalendarByName(const std::string &calendarName) const {
+        return m_calendars.getByName(calendarName);
+    }
+
+    TaskPtr getTaskByID(int id) {
+        return m_tasks.getByID(id);
+    }
+
+    TableContainer &tables() {
+        return m_tables;
+    }
+    FilterContainer &filters() {
+        return m_filters;
+    }
+    GroupContainer &groups() {
+        return m_groups;
+    }
+
+    ProjectCalendarPtr defaultCalendar();
 };
 
 }

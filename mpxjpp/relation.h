@@ -2,9 +2,11 @@
 #define RELATION_H
 
 #include "duration.h"
-#include "task.h"
 
 namespace mpxjpp {
+
+class Task;
+using TaskPtr = std::shared_ptr<Task>;
 
 enum class RelationType {
     FINISH_FINISH = 0,

@@ -21,7 +21,8 @@ SOURCES += main.cpp \
     customfield.cpp \
     projectfile.cpp \
     task.cpp \
-    mpp/mpputility.cpp
+    mpp/mpputility.cpp \
+    viewstate.cpp
 
 HEADERS += \
     daterange.h \
@@ -64,7 +65,8 @@ HEADERS += \
     customfield.h \
     common/uuid.h \
     projectfile.h \
-    mpp/mpputility.h
+    mpp/mpputility.h \
+    common/common.h
 
 QMAKE_CXXFLAGS_RELEASE += -Wpedantic -Wextra
 #QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin

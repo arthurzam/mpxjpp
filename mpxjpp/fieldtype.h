@@ -146,6 +146,30 @@ protected:
     T _field_get(unsigned field) const {
         return common::any_type_cast<T>::get(m_array[field], {});
     }
+
+    template <typename T, unsigned BeginRange, unsigned EndRange, typename Predicate>
+    T _field_range_get(unsigned pos, Predicate p) const {
+        if (pos < BeginRange || pos > EndRange)
+            throw std::invalid_argument("index should be in range");
+        return _field_get<T>(p(pos));
+    }
+    template <typename T, unsigned BeginRange, unsigned EndRange, typename Predicate>
+    void _field_range_set(unsigned pos, T value, Predicate p) {
+        if (pos < BeginRange || pos > EndRange)
+            throw std::invalid_argument("index should be in range");
+        _field_set<T>(p(pos), value);
+    }
+
+    template <typename... U>
+    inline const common::any &_field_get_nonempty(unsigned N1, unsigned N2, U... N) const {
+        const common::any &obj = m_array[N1];
+        if (obj.empty())
+            return _field_get_nonempty(N2, N...);
+        return obj;
+    }
+    inline const common::any &_field_get_nonempty(unsigned N0) const {
+        return m_array[N0];
+    }
 public:
     virtual ~FieldContainer() {
         delete[] m_array;
@@ -160,6 +184,9 @@ public:
      */
     common::any &getCachedValue(const FieldType &field) const {
         return m_array[field.m_value];
+    }
+    common::any &getCachedValue(unsigned field) const {
+        return m_array[field];
     }
 
     /**
@@ -194,6 +221,14 @@ public:
 #define MPXJPP_FIELD_GETTER_SETTER(varName, type, field) \
     MPXJPP_FIELD_GETTER(varName, type, field) \
     MPXJPP_FIELD_SETTER(varName, type, field)
+
+#define MPXJPP_FIELD_SELECT_GETTER_SETTER(varName, type, BeginRange, EndRange, func) \
+    type varName(unsigned baselineNumber) const { \
+        return _field_range_get<type, BeginRange, EndRange>(baselineNumber, func); \
+    } \
+    void set_##varName(unsigned baselineNumber, type value) { \
+        _field_range_set<type, BeginRange, EndRange>(baselineNumber, value, func); \
+    }
 
 }  // namespace mpxjpp
 

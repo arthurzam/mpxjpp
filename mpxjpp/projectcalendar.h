@@ -369,24 +369,25 @@ private:
     void populateExpandedExceptions();
     void sortWorkWeeks();
 };
+using ProjectCalendarPtr = std::shared_ptr<ProjectCalendar>;
 
 class ProjectCalendarContainer final : public ProjectEntityContainer<ProjectCalendar> {
 protected:
-    virtual void removed(const std::shared_ptr<ProjectCalendar> &cal) override;
+    virtual void removed(const ProjectCalendarPtr &cal) override;
 public:
     ProjectCalendarContainer(ProjectFile &file) :
         ProjectEntityContainer<ProjectCalendar>(file)
     {}
 
-    std::shared_ptr<ProjectCalendar> add() {
-        std::shared_ptr<ProjectCalendar> r = std::make_shared<ProjectCalendar>(m_mpx);
-        ListWithCallbacks<std::shared_ptr<ProjectCalendar>>::add(r);
+    ProjectCalendarPtr create() {
+        auto r = std::make_shared<ProjectCalendar>(m_mpx);
+        add(r);
         return r;
     }
 
-    std::shared_ptr<ProjectCalendar> addDefaultBaseCalendar();
-    std::shared_ptr<ProjectCalendar> addDefaultDerivedCalendar();
-    std::shared_ptr<ProjectCalendar> getByName(const std::string &calendarName) const;
+    ProjectCalendarPtr addDefaultBaseCalendar();
+    ProjectCalendarPtr addDefaultDerivedCalendar();
+    ProjectCalendarPtr getByName(const std::string &calendarName) const;
 };
 
 }

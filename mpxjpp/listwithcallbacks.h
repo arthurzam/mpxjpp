@@ -42,27 +42,17 @@ public:
         added(size() - 1);
     }
 
-//  void add(const T &val) {
-//      this->push_back(val);
-//      added(size() - 1);
-//  }
-
-//  void add(T &&val) {
-//      this->push_back(std::move(val));
-//      added(size() - 1);
-//  }
-
-    void add(const T &val, int index) {
+    void add(const T &val, size_t index) {
         this->insert(begin() + index, val);
         added(index);
     }
 
-    void add(T &&val, int index) {
+    void add(T &&val, size_t index) {
         this->insert(begin() + index, std::move(val));
         added(index);
     }
 
-    T&& set(int index, const T &element) {
+    T&& set(size_t index, const T &element) {
         T &ref(this->at(index));
         T removed(ref);
         ref = element;
@@ -70,9 +60,15 @@ public:
         return std::move(removed);
     }
 
-    T&& remove(int index) {
+    T&& remove(size_t index) {
         T obj(this->at(index));
         this->erase(begin() + index);
+        removed(obj);
+        return std::move(obj);
+    }
+    T&& remove(typename std::vector<T>::const_iterator iter) {
+        T obj(*iter);
+        this->erase(iter);
         removed(obj);
         return std::move(obj);
     }

@@ -23,7 +23,7 @@ namespace anyimpl {
 template<>
 struct compare_to<seconds> {
     int operator()(seconds a, seconds b) {
-        return (a - b).count();
+        return static_cast<int>((a - b).count());
     }
 };
 }

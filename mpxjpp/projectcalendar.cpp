@@ -29,7 +29,7 @@ const ProjectCalendarHours *ProjectCalendarWeek::hours(Day day) {
 
 ProjectCalendar::ProjectCalendar(ProjectFile &file) :
     m_projectFile(file) {
-    if (m_projectFile.projectConfig().autoCalendarUniqueID() == true)
+    if (m_projectFile.projectConfig().autoCalendarUniqueID())
         set_uniqueID(m_projectFile.projectConfig().getNextCalendarUniqueID());
 }
 
@@ -75,15 +75,15 @@ void ProjectCalendar::sortWorkWeeks() {
     }
 }
 
-void ProjectCalendarContainer::removed(const std::shared_ptr<ProjectCalendar> &cal) {
+void ProjectCalendarContainer::removed(const ProjectCalendarPtr &cal) {
 //  Resource resource = cal->getResource();
 //  if (resource != null)
 //     resource.setResourceCalendar(null);
     cal->set_parent(nullptr);
 }
 
-std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::addDefaultBaseCalendar() {
-    auto cal = add();
+ProjectCalendarPtr ProjectCalendarContainer::addDefaultBaseCalendar() {
+    auto cal = create();
     cal->set_name(ProjectCalendar::DEFAULT_BASE_CALENDAR_NAME);
     cal->addDefaultCalendarHours();
 
@@ -97,8 +97,8 @@ std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::addDefaultBaseCalenda
     return (cal);
 }
 
-std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::addDefaultDerivedCalendar() {
-    auto cal = add();
+ProjectCalendarPtr ProjectCalendarContainer::addDefaultDerivedCalendar() {
+    auto cal = create();
     cal->set_name(ProjectCalendar::DEFAULT_BASE_CALENDAR_NAME);
     cal->set_workingDay(Day::SUNDAY, DayType::DEFAULT);
     cal->set_workingDay(Day::MONDAY, DayType::DEFAULT);
@@ -110,7 +110,7 @@ std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::addDefaultDerivedCale
     return (cal);
 }
 
-std::shared_ptr<ProjectCalendar> ProjectCalendarContainer::getByName(const std::string &calendarName) const {
+ProjectCalendarPtr ProjectCalendarContainer::getByName(const std::string &calendarName) const {
     if (!calendarName.empty()) {
         const std::string calName = strutils::str_toupper(calendarName);
         for (const auto &calendar : *this) {

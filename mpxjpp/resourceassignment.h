@@ -117,16 +117,8 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(budgetWork, Duration, BUDGET_WORK)
     MPXJPP_FIELD_GETTER_SETTER(baselineBudgetCost, double, BASELINE_BUDGET_COST)
     MPXJPP_FIELD_GETTER_SETTER(baselineBudgetWork, Duration, BASELINE_BUDGET_WORK)
-    double baselineCost(unsigned baselineNumber) {
-        if (baselineNumber < 1 || baselineNumber > 10)
-            throw std::invalid_argument("baselineNumber should be int range [1,10]");
-        return _field_get<double>(AssignmentField::BASELINE1_COST + (baselineNumber - 1));
-    }
-    void set_baselineCost(unsigned baselineNumber, double value) {
-        if (baselineNumber < 1 || baselineNumber > 10)
-            throw std::invalid_argument("baselineNumber should be int range [1,10]");
-        _field_set(AssignmentField::BASELINE1_COST + (baselineNumber - 1), value);
-    }
+    MPXJPP_FIELD_SELECT_GETTER_SETTER(baselineCost, double, 1, 10, [] (unsigned pos) {
+        return AssignmentField::BASELINE1_COST + (pos - 1); })
 #undef FIELDTYPE_CLASS
 };
 

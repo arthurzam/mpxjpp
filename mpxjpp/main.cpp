@@ -30,9 +30,9 @@ int main()
 
 
     mpxjpp::common::any a;
-    cout << a.cast<int>(1) << endl;
+    cout << a.get<int>(1) << endl;
     a = 2;
-    cout << a.cast<int>(1) << endl << endl << std::dec;
+    cout << a.get<int>(1) << endl << endl << std::dec;
 
     cout << sizeof(unsigned) << endl;
     cout << sizeof(std::string) << endl;

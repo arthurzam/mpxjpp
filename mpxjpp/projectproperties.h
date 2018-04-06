@@ -172,16 +172,8 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(showProjectSummaryTask, bool, SHOW_PROJECT_SUMMARY_TASK)
 
     MPXJPP_FIELD_GETTER_SETTER(baselineDate, common::DateTime, BASELINE_DATE)
-    common::DateTime baselineDate(unsigned baselineNumber) {
-        if (baselineNumber < 1 || baselineNumber > 10)
-            throw std::invalid_argument("baselineNumber should be int range [1,10]");
-        return _field_get<common::DateTime>(ProjectField::BASELINE1_DATE + (baselineNumber - 1));
-    }
-    void set_baselineDate(int baselineNumber, common::DateTime value) {
-        if (baselineNumber < 1 || baselineNumber > 10)
-            throw std::invalid_argument("baselineNumber should be int range [1,10]");
-        _field_set(ProjectField::BASELINE1_DATE + (baselineNumber - 1), value);
-    }
+    MPXJPP_FIELD_SELECT_GETTER_SETTER(baselineDate, common::DateTime, 1, 10, [] (unsigned pos) {
+        return ProjectField::BASELINE1_DATE + (pos - 1); })
 
     MPXJPP_FIELD_GETTER_SETTER(fileTemplate, const std::string &, TEMPLATE)
     MPXJPP_FIELD_GETTER_SETTER(lastAuthor, const std::string &, LAST_AUTHOR)

@@ -16,6 +16,7 @@ public:
         VERY_HIGH = 800,
         HIGHEST = 900,
         DO_NOT_LEVEL = 1000;
+    using ANY_TYPE_CAST = int;
 private:
     int m_value;
 public:
