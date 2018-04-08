@@ -4,7 +4,7 @@
 using namespace mpxjpp;
 
 Task::Task(ProjectFile &file, Task *parent) :
-    ProjectEntity (file), FieldContainer (TaskField::FINISH + 1),
+    FieldContainer (TaskField::FINISH + 1), ProjectEntity (file),
     m_parent(parent) {
     set_type(TaskType::FIXED_UNITS);
     set_constraintType(ConstraintType::AS_SOON_AS_POSSIBLE);
@@ -237,11 +237,9 @@ const ProjectCalendar *Task::effectiveCalendar() {
 }
 
 Relation Task::addPredecessor(TaskPtr targetTask, RelationType type, Duration lag) {
-    int pos;
-
     // insert relation to targetTask->successors
     RelationList &successorList = targetTask->getCachedValue(TaskField::SUCCESSORS).get_assign<RelationList>({});
-    pos = -1;
+    int pos = -1;
     for(const auto &relation : successorList)
         if (relation.targetTask().get() == this && relation.type() == type && relation.lag() == lag) {
             pos = 0;
@@ -252,7 +250,6 @@ Relation Task::addPredecessor(TaskPtr targetTask, RelationType type, Duration la
 
     // insert relation to this->predecessors
     RelationList &predecessorList = getCachedValue(TaskField::PREDECESSORS).get_assign<RelationList>({});
-    pos = -1;
     for(const auto &relation : predecessorList) {
         if (relation.targetTask() == targetTask && relation.type() == type && relation.lag() == lag) {
             return relation;

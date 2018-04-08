@@ -18,12 +18,11 @@
 #include "priority.h"
 #include "relation.h"
 #include "projectcalendar.h"
+#include "resourceassignment.h"
 
 #include "common/uuid.h"
 
 namespace mpxjpp {
-
-class ResourceAssignment;
 
 class Task;
 using TaskPtr = std::shared_ptr<Task>;
@@ -56,7 +55,7 @@ public:
     virtual TaskPtr addTask() = 0;
 };
 
-class Task final : public ProjectEntity, public FieldContainer, public ProjectEntityWithID, public ChildTaskContainer,
+class Task final : public FieldContainer, public ProjectEntity, public ProjectEntityWithID, public ChildTaskContainer,
         public std::enable_shared_from_this<Task> {
 public:
     using RelationList = std::vector<Relation>;
@@ -78,7 +77,7 @@ private:
     /**
      * List of resource assignments for this task.
      */
-    std::vector<ResourceAssignment> m_assignments;
+    std::vector<ResourceAssignmentPtr> m_assignments;
 
     /**
      * Recurring task details associated with this task.
@@ -111,7 +110,7 @@ public:
     TaskPtr addTask() override;
     void remove();
 
-    std::vector<ResourceAssignment> &resourceAssignments() {
+    std::vector<ResourceAssignmentPtr> &resourceAssignments() {
         return m_assignments;
     }
 

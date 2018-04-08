@@ -369,6 +369,20 @@ struct any_type_cast<T, std::enable_if_t<std::is_enum<T>::value ||
 };
 
 template<typename T>
+struct any_type_cast<T, std::enable_if_t<std::is_pointer<T>::value >> {
+    using type = T;
+    using castType = void *;
+
+    static type get(const any &a, castType def) {
+        return static_cast<type>(a.get<castType>(def));
+    }
+
+    static void set(any &a, type var) {
+        a.assign<castType>(const_cast<void *>(static_cast<const void *>(var)));
+    }
+};
+
+template<typename T>
 struct any_type_cast<T, details::void_t<typename T::ANY_TYPE_CAST>> {
     using type = T;
     using castType = typename T::ANY_TYPE_CAST;

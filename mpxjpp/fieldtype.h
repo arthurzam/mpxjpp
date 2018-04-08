@@ -196,7 +196,9 @@ public:
      * @param field field identifier
      * @return field value
      */
-    virtual common::any &getCurrentValue(const FieldType &field) = 0;
+    virtual common::any &getCurrentValue(const FieldType &field) {
+        return m_array[field.m_value];
+    }
 
     /*
      * possible functions - not found as used

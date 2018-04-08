@@ -10,9 +10,9 @@ namespace mpxjpp {
 
 class CostRateTableEntry final {
     private:
-        Rate m_standardRate = Rate(0, TimeUnit::HOURS);
+        Rate m_standardRate{0, TimeUnit::HOURS};
+        Rate m_overtimeRate{0, TimeUnit::HOURS};
         TimeUnit m_standardRateFormat = TimeUnit::HOURS;
-        Rate m_overtimeRate = Rate(0, TimeUnit::HOURS);
         TimeUnit m_overtimeRateFormat = TimeUnit::HOURS;
         double m_costPerUse = 0;
         common::DateTime m_endDate = common::DateTime::max();
@@ -21,8 +21,8 @@ class CostRateTableEntry final {
         constexpr CostRateTableEntry(Rate standardRate, TimeUnit standardRateFormat,
                            Rate overtimeRate, TimeUnit overtimeRateFormat,
                            double costPerUse, common::DateTime endDate) :
-            m_standardRate(standardRate), m_standardRateFormat(standardRateFormat),
-            m_overtimeRate(overtimeRate), m_overtimeRateFormat(overtimeRateFormat),
+            m_standardRate(standardRate), m_overtimeRate(overtimeRate),
+            m_standardRateFormat(standardRateFormat), m_overtimeRateFormat(overtimeRateFormat),
             m_costPerUse(costPerUse), m_endDate(endDate)
         {}
 
@@ -54,7 +54,7 @@ class CostRateTable final : public std::vector<CostRateTableEntry> {
          */
         int getIndexByDate(common::DateTime date) {
             int index = 0;
-            for (const auto entry : *this) {
+            for (const auto &entry : *this) {
                 if (date < entry.endDate())
                     return index;
                 index++;

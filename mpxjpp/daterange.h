@@ -31,10 +31,10 @@ struct DateRange final {
     }
 
     constexpr int compareTo(const DateRange &other) {
-        int result = (start - other.start).count();
+        auto result = (start - other.start).count();
         if (result == 0)
             result = (other.end - end).count();
-        return result;
+        return static_cast<int>(result);
     }
 };
 static_assert(std::is_pod<DateRange>::value, "DateRange should be POD");
@@ -48,7 +48,7 @@ struct hash<mpxjpp::DateRange> {
     constexpr size_t operator()(const mpxjpp::DateRange &val) const {
         auto start = val.start.count();
         auto end = val.end.count();
-        return (static_cast<size_t>(start) * 2654435761U) ^ end;
+        return (static_cast<size_t>(start) * 2654435761U) ^ static_cast<size_t>(end);
     }
 };
 

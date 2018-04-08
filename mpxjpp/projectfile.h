@@ -25,7 +25,7 @@ private:
     ProjectProperties m_properties;
     ResourceContainer *m_resources;
     TaskContainer m_tasks;
-    ResourceAssignmentContainer *m_assignments;
+    ResourceAssignmentContainer m_assignments;
     ProjectCalendarContainer m_calendars;
     TableContainer m_tables;
     FilterContainer m_filters;
@@ -56,7 +56,13 @@ public:
     TaskContainer &allTasks() {
         return m_tasks;
     }
+    ResourceAssignmentContainer &allResourceAssignments() {
+        return m_assignments;
+    }
 
+    ProjectCalendarContainer &calendars() {
+        return m_calendars;
+    }
     ProjectProperties &projectProperties() {
         return m_properties;
     }
@@ -70,6 +76,9 @@ public:
 
     TaskPtr getTaskByID(int id) {
         return m_tasks.getByID(id);
+    }
+    TaskPtr getTaskByUniqueID(int id) {
+       return m_tasks.getByUniqueID(id);
     }
 
     TableContainer &tables() {
