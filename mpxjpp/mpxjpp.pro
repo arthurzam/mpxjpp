@@ -22,7 +22,8 @@ SOURCES += main.cpp \
     projectfile.cpp \
     task.cpp \
     mpp/mpputility.cpp \
-    viewstate.cpp
+    viewstate.cpp \
+    resource.cpp
 
 HEADERS += \
     daterange.h \
@@ -66,7 +67,8 @@ HEADERS += \
     common/uuid.h \
     projectfile.h \
     mpp/mpputility.h \
-    common/common.h
+    common/common.h \
+    resource.h
 
 QMAKE_CXXFLAGS_RELEASE += -Wpedantic -Wextra
 #QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin

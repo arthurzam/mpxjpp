@@ -62,15 +62,13 @@ public:
 
     T&& remove(size_t index) {
         T obj(this->at(index));
-        this->erase(begin() + index);
         removed(obj);
+        this->erase(begin() + index);
         return std::move(obj);
     }
-    T&& remove(typename std::vector<T>::const_iterator iter) {
-        T obj(*iter);
-        this->erase(iter);
-        removed(obj);
-        return std::move(obj);
+    auto remove(typename std::vector<T>::const_iterator iter) {
+        removed(*iter);
+        return this->erase(iter);
     }
 };
 

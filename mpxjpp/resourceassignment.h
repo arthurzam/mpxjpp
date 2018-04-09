@@ -44,15 +44,10 @@ public:
     MPXJPP_GETTER_SETTER(responsePending, bool)
 };
 
-enum class ResourceType {
-    MATERIAL,
-    WORK,
-    COST
-};
-
 class ResourceAssignment final : public FieldContainer, public ProjectEntity, public ProjectEntityWithUniqueID,
         public std::enable_shared_from_this<ResourceAssignment> {
 public:
+    static constexpr double DEFAULT_UNITS = 100;
     struct FinderAssignment {
         const ResourceAssignment *ptr;
 
@@ -95,7 +90,10 @@ public:
     }
 
     Task *task();
+    std::shared_ptr<Resource> resource();
     void remove();
+
+    CostRateTable *costRateTable();
 
     // getTimephasedWork(); #565
     // setTimephasedWork; #576
@@ -128,17 +126,17 @@ public:
     Date finish();
 
     MPXJPP_FIELD_SELECT_GETTER_SETTER(text, const std::string &, 1, 30, [] (unsigned pos) {
-        return pos <= 10 ? AssignmentField::TEXT1 + (pos - 1) : AssignmentField::TEXT11 + (pos - 11); })
+        return pos < 11 ? AssignmentField::TEXT1 + (pos - 1) : AssignmentField::TEXT11 + (pos - 11); })
     MPXJPP_FIELD_SELECT_GETTER_SETTER(start, Date, 1, 10, [] (unsigned pos) {
-        return pos <= 6 ? AssignmentField::START1 + (pos - 1) : AssignmentField::START6 + (pos - 6); })
+        return pos < 6 ? AssignmentField::START1 + (pos - 1) : AssignmentField::START6 + (pos - 6); })
     MPXJPP_FIELD_SELECT_GETTER_SETTER(finish, Date, 1, 10, [] (unsigned pos) {
-        return pos <= 6 ? AssignmentField::FINISH1 + (pos - 1) : AssignmentField::FINISH6 + (pos - 6); })
+        return pos < 6 ? AssignmentField::FINISH1 + (pos - 1) : AssignmentField::FINISH6 + (pos - 6); })
     MPXJPP_FIELD_SELECT_GETTER_SETTER(number, double, 1, 20, [] (unsigned pos) {
-        return pos <= 6 ? AssignmentField::NUMBER1 + (pos - 1) : AssignmentField::NUMBER6 + (pos - 6); })
+        return pos < 6 ? AssignmentField::NUMBER1 + (pos - 1) : AssignmentField::NUMBER6 + (pos - 6); })
     MPXJPP_FIELD_SELECT_GETTER_SETTER(duration, Duration, 1, 10, [] (unsigned pos) {
-        return pos <= 4 ? AssignmentField::DURATION1 + (pos - 1) : AssignmentField::DURATION4 + (pos - 4); })
+        return pos < 4 ? AssignmentField::DURATION1 + (pos - 1) : AssignmentField::DURATION4 + (pos - 4); })
     MPXJPP_FIELD_SELECT_GETTER_SETTER(cost, double, 1, 10, [] (unsigned pos) {
-        return pos <= 3 ? AssignmentField::COST1 + (pos - 1) : AssignmentField::COST3 + (pos - 3); })
+        return pos < 4 ? AssignmentField::COST1 + (pos - 1) : AssignmentField::COST4 + (pos - 4); })
     MPXJPP_FIELD_SELECT_GETTER_SETTER(flag, bool, 1, 20, [] (unsigned pos) {
         return pos == 10 ? AssignmentField::FLAG10 + 0 :
                pos <  10 ? AssignmentField::FLAG1 + (pos - 1) : AssignmentField::FLAG11 + (pos - 11); })
@@ -179,7 +177,7 @@ public:
         }
         return variance.cast<double>();
     }
-    MPXJPP_FIELD_SETTER(sv, double, CV)
+    MPXJPP_FIELD_SETTER(sv, double, SV)
     double sv() {
         const common::any &variance = getCachedValue(AssignmentField::SV);
         if (variance.empty()) {
@@ -199,8 +197,21 @@ public:
         }
         return variance.cast<double>();
     }
-//    MPXJPP_FIELD_GETTER_SETTER(costVariance, double, COST_VARIANCE)
-//    MPXJPP_FIELD_GETTER_SETTER(percentageWorkComplete, double, PERCENT_WORK_COMPLETE)
+    MPXJPP_FIELD_SETTER(costVariance, double, COST_VARIANCE)
+    double costVariance() {
+        const common::any &variance = getCachedValue(AssignmentField::COST_VARIANCE);
+        if (variance.empty()) {
+            const double result = cost() - baselineCost();
+            _field_set<double>(AssignmentField::COST_VARIANCE, result);
+            return result;
+        }
+        return variance.cast<double>();
+    }
+    MPXJPP_FIELD_SETTER(percentageWorkComplete, double, PERCENT_WORK_COMPLETE)
+    double percentageWorkComplete();
+    MPXJPP_FIELD_SETTER(workVariance, Duration, WORK_VARIANCE)
+    Duration workVariance();
+
     MPXJPP_FIELD_GETTER_SETTER(notes, const std::string &, NOTES)
     MPXJPP_FIELD_GETTER_SETTER(confirmed, bool, CONFIRMED)
     MPXJPP_FIELD_GETTER_SETTER(updateNeeded, bool, UPDATE_NEEDED)
@@ -208,7 +219,6 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(hyperlink, const std::string &, HYPERLINK)
     MPXJPP_FIELD_GETTER_SETTER(hyperlinkAddress, const std::string &, HYPERLINK_ADDRESS)
     MPXJPP_FIELD_GETTER_SETTER(hyperlinkSubAddress, const std::string &, HYPERLINK_SUBADDRESS)
-//    MPXJPP_FIELD_GETTER_SETTER(workVariance, Duration, WORK_VARIANCE)
 //    MPXJPP_FIELD_GETTER_SETTER(startVariance, Duration, START_VARIANCE)
 //    MPXJPP_FIELD_GETTER_SETTER(finishVariance, Duration, FINISH_VARIANCE)
     MPXJPP_FIELD_GETTER_SETTER(createDate, Date, CREATED)
@@ -217,7 +227,6 @@ public:
     MPXJPP_FIELD_GETTER_SETTER(teamStatusPending, bool, TEAM_STATUS_PENDING)
     MPXJPP_FIELD_GETTER_SETTER(vac, double, VAC)
     MPXJPP_FIELD_GETTER_SETTER(costRateTableIndex, int, COST_RATE_TABLE)
-    CostRateTable &costRateTable();
     MPXJPP_FIELD_GETTER_SETTER(hyperlinkScreenTip, const std::string &, HYPERLINK_SCREEN_TIP)
     MPXJPP_FIELD_GETTER_SETTER(resourceRequestType, ResourceRequestType, RESOURCE_REQUEST_TYPE)
     MPXJPP_FIELD_GETTER_SETTER(stop, Date, STOP)

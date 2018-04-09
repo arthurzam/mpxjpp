@@ -17,9 +17,18 @@ Task *ResourceAssignment::task() {
     return m_task.get();
 }
 
+std::shared_ptr<Resource> ResourceAssignment::resource() {
+    return parentFile().getResourceByUniqueID(resourceUniqueID());
+}
+
 void ResourceAssignment::remove() {
     auto &list = parentFile().allResourceAssignments();
     list.remove(std::find_if(list.cbegin(), list.cend(), FinderAssignment{this}));
+}
+
+CostRateTable *ResourceAssignment::costRateTable() {
+    Resource *resource = this->resource().get();
+    return (!resource ? nullptr : &resource->costRateTable(static_cast<unsigned>(costRateTableIndex())));
 }
 
 ResourceAssignment::Date ResourceAssignment::start() {
@@ -32,12 +41,29 @@ ResourceAssignment::Date ResourceAssignment::finish() {
     return result.empty() ? task()->finish() : result.get<Date>({});
 }
 
+double ResourceAssignment::percentageWorkComplete() {
+    const common::any &variance = getCachedValue(AssignmentField::PERCENT_WORK_COMPLETE);
+    if (variance.empty()) {
+        const Duration actualWork = this->actualWork();
+        const double result = (actualWork.duration() * 100) / work().convertUnits(actualWork.units(), parentFile().projectProperties()).duration();
+        _field_set<double>(AssignmentField::PERCENT_WORK_COMPLETE, result);
+        return result;
+    }
+    return variance.cast<double>();
+}
+
+Duration ResourceAssignment::workVariance() {
+    const common::any &variance = getCachedValue(AssignmentField::WORK_VARIANCE);
+    if(variance.empty()) {
+        const Duration result = Duration::sub(work(), baselineWork(), parentFile().projectProperties());
+        _field_set<Duration>(AssignmentField::WORK_VARIANCE, result);
+        return result;
+    }
+    return variance.cast<Duration>();
+}
+
 void ResourceAssignmentContainer::removed(const ResourceAssignmentPtr &assignment) {
-    // TODO:
-//    assignment.getTask().removeResourceAssignment(assignment);
-//    Resource resource = assignment.getResource();
-//    if (resource != null)
-//    {
-//       resource.removeResourceAssignment(assignment);
-//    }
+    assignment->task()->removeResourceAssignment(assignment.get());
+    if (Resource *resource = assignment->resource().get())
+       resource->removeResourceAssignment(assignment.get());
 }

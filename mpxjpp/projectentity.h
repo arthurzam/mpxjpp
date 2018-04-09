@@ -81,7 +81,7 @@ public:
     void renumberUniqueIDs() {
         int uid = firstUniqueID();
         for (std::shared_ptr<T> &entity : *this) {
-            entity->setUniqueID(uid++);
+            entity->set_uniqueID(uid++);
         }
     }
 
@@ -89,7 +89,7 @@ public:
         static constexpr int MS_PROJECT_MAX_UNIQUE_ID = 0x1FFFFF;
         if (!this->empty())
             for (const std::shared_ptr<T> &entity : *this)
-                if (entity->getUniqueID() > MS_PROJECT_MAX_UNIQUE_ID)
+                if (entity->uniqueID() > MS_PROJECT_MAX_UNIQUE_ID)
                     return renumberUniqueIDs();
     }
 

@@ -1,6 +1,7 @@
 #include "projectcalendar.h"
 #include "projectproperties.h"
 #include "projectfile.h"
+#include "resource.h"
 
 #include "common/strutils.h"
 
@@ -31,6 +32,12 @@ ProjectCalendar::ProjectCalendar(ProjectFile &file) :
     m_projectFile(file) {
     if (m_projectFile.projectConfig().autoCalendarUniqueID())
         set_uniqueID(m_projectFile.projectConfig().getNextCalendarUniqueID());
+}
+
+void ProjectCalendar::set_resource(ResourcePtr resource) {
+    const std::string &name = resource->name();
+    set_name(name.empty() ? "Unnamed Resource" : name);
+    m_resource = std::move(resource);
 }
 
 void ProjectCalendar::set_parent(ProjectCalendar *calendar) {

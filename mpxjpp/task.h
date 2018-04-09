@@ -1,10 +1,6 @@
 #ifndef TASK_H
 #define TASK_H
 
-#include <memory>
-#include <string>
-#include <vector>
-
 #include "recurringdata.h"
 #include "subproject.h"
 #include "mpxjpp-gens.h"
@@ -85,18 +81,19 @@ private:
     RecurringTask m_recurringTask;
 
     //  bool m_eventsEnabled = true;
-    bool m_null;
     std::string m_wbsLevel;
-    bool m_resumeValid;
     std::string m_externalTaskProject;
     TimeUnit m_levelingDelayFormat{TimeUnit::HOURS};
     Duration m_actualWorkProtected;
     Duration m_actualOvertimeWorkProtected;
-    bool m_expanded = true;
 
     std::vector<DateRange> m_splits;
     common::DateTime m_splitsComplete;
     SubProject m_subProject;
+
+    unsigned char m_expanded:1;
+    unsigned char m_resumeValid:1;
+    unsigned char m_null:1;
     //  std::vector<FieldListener> m_listeners;
 
 public:
@@ -112,6 +109,14 @@ public:
 
     std::vector<ResourceAssignmentPtr> &resourceAssignments() {
         return m_assignments;
+    }
+    ResourceAssignmentPtr addResourceAssignment(Resource *resource);
+    void addResourceAssignment(ResourceAssignmentPtr assignment);
+    ResourceAssignmentPtr getExistingResourceAssignment(const Resource *resource);
+    void removeResourceAssignment(const ResourceAssignment *assignment) {
+        auto iter = std::find_if(m_assignments.cbegin(), m_assignments.cend(), ResourceAssignment::FinderAssignment{assignment});
+        if (iter != m_assignments.cend())
+            m_assignments.erase(iter);
     }
 
     common::any &getCurrentValue(const FieldType &field) override;
@@ -216,7 +221,7 @@ public:
     double costVariance() {
         const common::any &variance = getCachedValue(TaskField::COST_VARIANCE);
         if(variance.empty()) {
-            const double result = this->cost() - this->baselineCost();
+            const double result = cost() - baselineCost();
             _field_set<double>(TaskField::COST_VARIANCE, result);
             return result;
         }

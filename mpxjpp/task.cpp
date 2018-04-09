@@ -5,7 +5,7 @@ using namespace mpxjpp;
 
 Task::Task(ProjectFile &file, Task *parent) :
     FieldContainer (TaskField::FINISH + 1), ProjectEntity (file),
-    m_parent(parent) {
+    m_parent(parent), m_expanded(true) {
     set_type(TaskType::FIXED_UNITS);
     set_constraintType(ConstraintType::AS_SOON_AS_POSSIBLE);
     set_taskMode(TaskMode::AUTO_SCHEDULED);
@@ -75,6 +75,46 @@ TaskPtr Task::addTask() {
 
 void Task::remove() {
     parentFile().removeTask(this);
+}
+
+ResourceAssignmentPtr Task::addResourceAssignment(Resource *resource) {
+    ResourceAssignmentPtr assignment = getExistingResourceAssignment(resource);
+    if (!assignment) {
+        assignment = std::make_shared<ResourceAssignment>(parentFile(), shared_from_this());
+
+        assignment->set_taskUniqueID(uniqueID());
+        assignment->set_work(duration());
+        assignment->set_units(ResourceAssignment::DEFAULT_UNITS);
+
+        parentFile().allResourceAssignments().add(assignment);
+        if (resource) {
+            assignment->set_resourceUniqueID(resource->uniqueID());
+            resource->addResourceAssignment(assignment);
+        }
+        m_assignments.push_back(assignment);
+    }
+    return assignment;
+}
+
+void Task::addResourceAssignment(ResourceAssignmentPtr assignment) {
+    Resource *resource = assignment->resource().get();
+    if (!resource)
+        return;
+    if (!getExistingResourceAssignment(resource)) {
+        parentFile().allResourceAssignments().add(assignment);
+        resource->addResourceAssignment(assignment);
+        m_assignments.push_back(std::move(assignment));
+    }
+}
+
+ResourceAssignmentPtr Task::getExistingResourceAssignment(const Resource *resource) {
+    if (!resource)
+        return {};
+    const int resourceUniqueID = resource->uniqueID();
+    auto iter = std::find_if(m_assignments.cbegin(), m_assignments.cend(), [resourceUniqueID] (const ResourceAssignmentPtr &assignment) {
+        return assignment->resourceUniqueID() == resourceUniqueID;
+    });
+    return (iter == m_assignments.cend()) ? ResourceAssignmentPtr{} : *iter;
 }
 
 common::any &Task::getCurrentValue(const FieldType &field) {

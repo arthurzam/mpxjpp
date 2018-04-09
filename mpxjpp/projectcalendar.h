@@ -20,6 +20,7 @@
 namespace mpxjpp {
 
 class Resource;
+using ResourcePtr = std::shared_ptr<Resource>;
 
 /**
  * An abstract class representing a collection of date ranges
@@ -279,6 +280,13 @@ public:
 class ProjectCalendar final : public ProjectCalendarWeek, public ProjectEntityWithUniqueID {
 public:
     static constexpr const char *DEFAULT_BASE_CALENDAR_NAME = "Standard";
+    struct FinderCalendar {
+        const ProjectCalendar *ptr;
+
+        bool operator() (const std::shared_ptr<ProjectCalendar> &p) {
+            return p.get() == ptr;
+        }
+    };
 private:
     static constexpr int MAX_NONWORKING_DAYS = 1000;
 
@@ -288,7 +296,7 @@ private:
     std::vector<std::unique_ptr<ProjectCalendarException>> m_expandedExceptions;
     bool m_exceptionsSorted;
     bool m_weeksSorted;
-    Resource *m_resource;
+    ResourcePtr m_resource;
     std::vector<std::unique_ptr<ProjectCalendar>> m_derivedCalendars;
 
     std::map<DateRange, common::DateTime> m_workingDateCache;
@@ -316,6 +324,11 @@ public:
     MPXJPP_SETTER(minutesPerMonth, int)
     MPXJPP_SETTER(minutesPerYear, int)
     MPXJPP_GETTER_SETTER(uniqueID, int)
+
+    ResourcePtr resource() {
+        return m_resource;
+    }
+    void set_resource(ResourcePtr resource);
 
     ProjectCalendarWeek *addWorkWeek();
     void clearWorkWeeks() {

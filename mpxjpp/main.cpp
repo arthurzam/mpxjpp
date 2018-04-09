@@ -38,6 +38,7 @@ int main()
     cout << sizeof(std::string) << endl;
     cout << sizeof(mpxjpp::Duration) << endl;
     cout << sizeof(std::shared_ptr<std::string>) << endl;
+    cout << sizeof(std::vector<mpxjpp::Duration>) << endl;
 
 //  year_month_day i = 1998_y/jan/1_d;
 //  auto j = static_cast<sys_days>(i) + seconds(5);

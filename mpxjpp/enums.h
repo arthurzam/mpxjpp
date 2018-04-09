@@ -83,6 +83,12 @@ enum class RecurrenceType {
     YEARLY = 16
 };
 
+enum class ResourceType {
+    MATERIAL,
+    WORK,
+    COST
+};
+
 enum class ScheduleFrom {
     START = 0,
     FINISH = 1
