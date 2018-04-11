@@ -40,7 +40,7 @@ public:
         if (n < size())
             return (*this)[n];
         else
-            return DateRange();
+            return { };
     }
 };
 

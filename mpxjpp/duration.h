@@ -10,7 +10,7 @@ class ProjectProperties;
 
 class Duration final {
     private:
-        double m_duration = 0;
+        double m_duration = 0.0;
         TimeUnit m_units = TimeUnit::MINUTES;
     public:
         constexpr Duration() = default;
@@ -118,7 +118,7 @@ class Duration final {
                     duration /= (60 * 24 * 7 * 52);
                     break;
             }
-            return Duration(duration, toUnits);
+            return {duration, toUnits};
         }
 
         static Duration convertUnits(double duration, TimeUnit fromUnits, TimeUnit toUnits, ProjectProperties &defaults);

@@ -21,7 +21,7 @@ static const common::any &getSingleOperand(const common::any &operand) {
 static int evaluateWithin(const common::any &lhs, const common::any &rhs) {
     if (!rhs.isType<std::vector<common::any>>())
         return false;
-    const std::vector<common::any> &rhsList = rhs.cast<std::vector<common::any>>();
+    const auto &rhsList = rhs.cast<std::vector<common::any>>();
     bool isRhsEmpty = rhsList[0].empty() || rhsList[1].empty();
     if (lhs.empty())
         return isRhsEmpty;
@@ -97,12 +97,11 @@ void GenericCriteria::setRightValue(unsigned index, const common::any &value) {
     if (value.isType<FieldType>())
         m_symbolicValues = true;
     else if (value.isType<Duration>()) {
-        const Duration &v = value.cast<Duration>();
-        m_definedRightValues[index] = v.convertUnits(TimeUnit::HOURS, m_properties);
+        m_definedRightValues[index] = value.cast<Duration>().convertUnits(TimeUnit::HOURS, m_properties);
     }
 }
 
-bool GenericCriteria::evaluate(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const {
+bool GenericCriteria::evaluate(FieldContainer &container, const CriteriaMap &promptValues) const {
     if (m_testOperator == TestOperator::AND || m_testOperator == TestOperator::OR) {
         return evaluateLogicalOperator(container, promptValues);
     }
@@ -130,7 +129,7 @@ bool GenericCriteria::evaluate(FieldContainer &container, std::unordered_map<Gen
     return m_testOperator.evaluate(lhs, (m_symbolicValues ? processSymbolicValues(m_workingRightValues, container, promptValues) : m_workingRightValues));
 }
 
-bool GenericCriteria::evaluateLogicalOperator(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const {
+bool GenericCriteria::evaluateLogicalOperator(FieldContainer &container, const CriteriaMap &promptValues) const {
     if (m_criteriaList.empty())
         return true;
     for (const auto &criteria : m_criteriaList) {
@@ -141,7 +140,7 @@ bool GenericCriteria::evaluateLogicalOperator(FieldContainer &container, std::un
     return false;
 }
 
-GenericCriteria::ObjectArray GenericCriteria::processSymbolicValues(const ObjectArray &oldValues, FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const {
+GenericCriteria::ObjectArray GenericCriteria::processSymbolicValues(const ObjectArray &oldValues, FieldContainer &container, const CriteriaMap &promptValues) const {
     ObjectArray newValues;
     for (unsigned i = 0; i < oldValues.size(); ++i) {
         const common::any &value = oldValues[i];
@@ -149,7 +148,7 @@ GenericCriteria::ObjectArray GenericCriteria::processSymbolicValues(const Object
         if (value.empty())
             continue;
         if (value.isType<FieldType>()) {
-            const FieldType &type = value.cast<FieldType>();
+            const auto &type = value.cast<FieldType>();
             const common::any &val = container.getCachedValue(type);
             switch (type.dataType()) {
                 case DataType::DATE:
@@ -208,7 +207,7 @@ int GraphicalIndicator::evaluate(FieldContainer &container) {
     return 0;
 }
 
-bool Filter::evaluate(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const {
+bool Filter::evaluate(FieldContainer &container, const CriteriaMap &promptValues) const {
     if (!m_criteria)
         return true; // CHECK: maybe false - error in upstream
     if (m_criteria->evaluate(container, promptValues))
@@ -232,12 +231,12 @@ void FilterContainer::addFilter(std::unique_ptr<Filter> &&filter) {
 }
 
 void FilterContainer::removeFilter(const std::string &filterName) {
-    for (auto iter = m_taskFilters.begin(), end = m_taskFilters.end(); iter != end; ++iter)
+    for (auto iter = m_taskFilters.cbegin(), end = m_taskFilters.cend(); iter != end; ++iter)
         if ((*iter)->name() == filterName) {
             m_taskFilters.erase(iter);
             return;
         }
-    for (auto iter = m_resourceFilters.begin(), end = m_resourceFilters.end(); iter != end; ++iter)
+    for (auto iter = m_resourceFilters.cbegin(), end = m_resourceFilters.cend(); iter != end; ++iter)
         if ((*iter)->name() == filterName) {
             m_resourceFilters.erase(iter);
             return;

@@ -16,12 +16,12 @@ class RecurringData
 {
     using Calendar = common::sys_days;
 private:
-    enum Flags {
+    enum Flags : unsigned{
         Flags_relative = 0x1,
         Flags_workingDaysOnly = 0x2,
         Flags_useEndDate = 0x4,
     };
-    static constexpr int maskOfDay(Day d) {
+    static constexpr unsigned maskOfDay(Day d) {
         return 0x1 << (2 + static_cast<int>(d));
     }
 
@@ -38,7 +38,7 @@ public:
     MPXJPP_GETTER_SETTER(finishDate, common::Date)
     MPXJPP_GETTER_SETTER(occurrences, int)
     MPXJPP_GETTER_SETTER(recurrenceType, RecurrenceType)
-    MPXJPP_GETTER_SETTER(frequency, int)
+    MPXJPP_GETTER_SETTER(frequency, unsigned)
     MPXJPP_GETTER_SETTER(dayNumber, int)
     MPXJPP_GETTER_SETTER(monthNumber, int)
 
@@ -87,7 +87,7 @@ public:
      * @param day day of the week
      */
     void set_dayOfWeek(Day day) {
-        m_flags &= ~(0b1111111000);
+        m_flags &= ~(0b1111111000U);
         m_flags |= maskOfDay(day);
     }
 

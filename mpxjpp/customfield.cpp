@@ -4,7 +4,7 @@
 
 using namespace mpxjpp;
 
-void CustomFieldLookupTable::added(int index) {
+void CustomFieldLookupTable::added(unsigned index) {
     m_parent.registerValue(&(*this)[index]);
 }
 
@@ -33,24 +33,24 @@ CustomFieldValueItem *CustomFieldContainer::getCustomFieldValueItemByUniqueID(in
 }
 
 void CustomFieldContainer::deregisterValue(const CustomFieldValueItem *item) {
-    auto it = std::find(m_valueMap.begin(), m_valueMap.end(), item);
-    if (it != m_valueMap.end())
+    auto it = std::find(m_valueMap.cbegin(), m_valueMap.cend(), item);
+    if (it != m_valueMap.cend())
         m_valueMap.erase(it);
 }
 
 void CustomFieldContainer::registerAlias(FieldType type, const std::string &alias) {
-    m_aliasMap.push_back({alias, type});
+    m_aliasMap.emplace_back(alias, type);
 }
 
 FieldType CustomFieldContainer::getFieldByAlias(FieldTypeClass typeClass, const std::string &alias) {
     for (const auto &element : m_aliasMap)
         if (element.second.fieldTypeClass() == typeClass && element.first == alias)
             return element.second;
-    return FieldType();
+    return {};
 }
 
 void CustomFieldContainer::registerAliasValue(const std::string &alias, int uid, common::any value) {
-    m_aliasValueMap.push_back({alias, uid, value});
+    m_aliasValueMap.emplace_back(alias, uid, value);
 }
 
 common::any CustomFieldContainer::getAliasValue(const std::string &alias, int uid) {

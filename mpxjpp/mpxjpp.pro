@@ -1,4 +1,5 @@
-TEMPLATE = app
+TARGET = mpxjpp
+TEMPLATE = lib
 CONFIG += console c++14
 CONFIG -= app_bundle
 
@@ -8,7 +9,6 @@ INCLUDEPATH += ../
 
 SOURCES += main.cpp \
     mpp/criteriareader.cpp \
-    group.cpp \
     projectconfig.cpp \
     enums.cpp \
     recurringdata.cpp \
@@ -71,5 +71,5 @@ HEADERS += \
     resource.h
 
 QMAKE_CXXFLAGS_RELEASE += -Wpedantic -Wextra
-#QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin
-#QMAKE_LFLAGS_RELEASE += -flto -fuse-linker-plugin
+QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin
+QMAKE_LFLAGS_RELEASE += -flto -fuse-linker-plugin

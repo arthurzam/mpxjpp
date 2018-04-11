@@ -101,7 +101,7 @@ struct ProjectField final : public FieldType {
     F(NEW_TASK_START_IS_PROJECT_START, DataType::BOOLEAN),\
     F(WEEK_START_DAY, DataType::DAY),\
     F(CALCULATE_MULTIPLE_CRITICAL_PATHS, DataType::BOOLEAN),\
-    /*F(CUSTOM_PROPERTIES, DataType::MAP),*/\
+    F(CUSTOM_PROPERTIES, DataType::MAP),\
     F(CURRENCY_CODE, DataType::STRING),\
     F(SHOW_PROJECT_SUMMARY_TASK, DataType::BOOLEAN),\
     F(BASELINE_DATE, DataType::DATE),\

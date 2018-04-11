@@ -26,8 +26,8 @@ class CustomFieldLookupTable : public ListWithCallbacks<CustomFieldValueItem> {
 private:
     CustomFieldContainer &m_parent;
 protected:
-    virtual void added(int index) override;
-    virtual void removed(const CustomFieldValueItem &item) override;
+     void added(unsigned index) override;
+     void removed(const CustomFieldValueItem &item) override;
 public:
     CustomFieldLookupTable(CustomFieldContainer &parent) :
         m_parent(parent)

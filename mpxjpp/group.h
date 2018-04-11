@@ -62,12 +62,12 @@ class Group final {
  */
 class GroupContainer final : public ListWithCallbacks<Group> {
     private:
-        std::map<std::string, int> m_groupsByName;
+        std::map<std::string, unsigned> m_groupsByName;
     protected:
-        virtual void added(int index) override {
+         void added(unsigned index) override {
             m_groupsByName.insert({(*this)[index].name(), index});
         }
-        virtual void removed(const Group &val) override {
+         void removed(const Group &val) override {
             m_groupsByName.erase(val.name());
         }
     public:

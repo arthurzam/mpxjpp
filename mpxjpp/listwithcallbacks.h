@@ -8,7 +8,7 @@ namespace mpxjpp {
 template <typename T>
 class ListWithCallbacks : private std::vector<T> {
 protected:
-    virtual void added(int) { }
+    virtual void added(unsigned) { }
     virtual void removed(const T &) { }
     virtual void replaced(const T &, const T &) { }
 public:
@@ -61,7 +61,7 @@ public:
     }
 
     T&& remove(size_t index) {
-        T obj(this->at(index));
+        T obj(std::move(this->at(index)));
         removed(obj);
         this->erase(begin() + index);
         return std::move(obj);

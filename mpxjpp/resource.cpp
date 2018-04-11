@@ -1,6 +1,8 @@
 #include "resource.h"
 #include "projectfile.h"
 
+#include <numeric>
+
 using namespace mpxjpp;
 
 Resource::Resource(ProjectFile &file) :
@@ -37,17 +39,13 @@ void Resource::removeResourceAssignment(const ResourceAssignment *assignment) {
 }
 
 Resource::Date Resource::start() const {
-    Date result{Date::max()};
-    for (const auto &assignment : m_assignments)
-        result = std::min(result, assignment->start());
-    return result;
+    return std::accumulate(m_assignments.cbegin(), m_assignments.cend(), Date::max(),
+                           [] (Date a, const auto &assignment) { return std::min(a, assignment->start());});
 }
 
 Resource::Date Resource::finish() const {
-    Date result{Date::min()};
-    for (const auto &assignment : m_assignments)
-        result = std::max(result, assignment->finish());
-    return result;
+    return std::accumulate(m_assignments.cbegin(), m_assignments.cend(), Date::min(),
+                           [] (Date a, const auto &assignment) { return std::max(a, assignment->finish());});
 }
 
 void Resource::set_id(int val) {

@@ -111,7 +111,7 @@ ResourceAssignmentPtr Task::getExistingResourceAssignment(const Resource *resour
     if (!resource)
         return {};
     const int resourceUniqueID = resource->uniqueID();
-    auto iter = std::find_if(m_assignments.cbegin(), m_assignments.cend(), [resourceUniqueID] (const ResourceAssignmentPtr &assignment) {
+    auto iter = std::find_if(m_assignments.cbegin(), m_assignments.cend(), [resourceUniqueID] (const auto &assignment) {
         return assignment->resourceUniqueID() == resourceUniqueID;
     });
     return (iter == m_assignments.cend()) ? ResourceAssignmentPtr{} : *iter;
@@ -327,8 +327,8 @@ bool Task::isRelated(const Task *task, const RelationList &list) {
 }
 
 void TaskContainer::removed(const TaskPtr &task) {
-    m_uniqueIDMap.erase(m_uniqueIDMap.find(task->uniqueID()));
-    m_idMap.erase(m_idMap.find(task->id()));
+    m_uniqueIDMap.erase(task->uniqueID());
+    m_idMap.erase(task->id());
 
     Task *parentTask = task->parentTask();
     if (parentTask)
@@ -338,23 +338,14 @@ void TaskContainer::removed(const TaskPtr &task) {
         children.erase(std::find_if(children.cbegin(), children.cend(), Task::FinderTask{task.get()}));
     }
 
-    /* TODO: Remove all resource assignments
-
-    Iterator<ResourceAssignment> iter = m_projectFile.getAllResourceAssignments().iterator();
-    while (iter.hasNext() == true)
-    {
-       ResourceAssignment assignment = iter.next();
-       if (assignment.getTask() == task)
-       {
-          Resource resource = assignment.getResource();
-          if (resource != null)
-          {
-             resource.removeResourceAssignment(assignment);
-          }
-          iter.remove();
-       }
+    auto &assignments = m_mpx.allResourceAssignments();
+    for (auto iter = assignments.cbegin(), end = assignments.cend(); iter != end; ++iter) {
+        if ((*iter)->task() == task.get()) {
+            if (Resource *resource = (*iter)->resource().get())
+                resource->removeResourceAssignment((*iter).get());
+            iter = assignments.remove(iter);
+        }
     }
-    */
 
     while (true) {
         auto &children = task->childTasks();

@@ -7,11 +7,12 @@ namespace mpxjpp {
 
 class Filter final {
     using CriteriaList = std::vector<std::unique_ptr<GraphicalIndicatorCriteria>>;
+    using CriteriaMap = std::unordered_map<GenericCriteriaPrompt, common::any>;
 private:
-    int m_id;
     std::string m_name;
     std::unique_ptr<GenericCriteria> m_criteria;
     CriteriaList m_prompts;
+    int m_id;
     unsigned char m_isTaskFilter:1;
     unsigned char m_isResourceFilter:1;
     unsigned char m_showRelatedSummaryRows:1;
@@ -33,7 +34,7 @@ public:
         m_criteria = std::move(criteria);
     }
 
-    bool evaluate(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const;
+    bool evaluate(FieldContainer &container, const CriteriaMap &promptValues) const;
 };
 
 class FilterContainer final {

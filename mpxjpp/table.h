@@ -64,18 +64,18 @@ static_assert(std::is_nothrow_move_constructible<Table>::value, "Table should be
 
 class TableContainer final : public ListWithCallbacks<Table> {
     private:
-        std::map<std::string, int> m_taskTablesByName, m_resourceTablesByName;
+        std::map<std::string, unsigned> m_taskTablesByName, m_resourceTablesByName;
 
-        std::map<std::string, int> &getIndex(const Table &table) {
+        std::map<std::string, unsigned> &getIndex(const Table &table) {
             return table.resourceFlag() ? m_resourceTablesByName : m_taskTablesByName;
         }
 
     protected:
-        virtual void added(int index) override {
+         void added(unsigned index) override {
             const Table &table = (*this)[index];
             getIndex(table).insert({table.name(), index});
         }
-        virtual void removed(const Table &val) override {
+         void removed(const Table &val) override {
             getIndex(val).erase(val.name());
         }
     public:

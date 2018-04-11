@@ -9,13 +9,13 @@ class ListWithCallbacks_Test : public CxxTest::TestSuite {
 private:
     class SubListTest : public mpxjpp::ListWithCallbacks<int> {
         protected:
-            virtual void added(int index) override {
+             void added(unsigned index) override {
                 throw int(at(index));
             }
-            virtual void removed(const int &num) override {
+             void removed(const int &num) override {
                 throw int(num);
             }
-            virtual void replaced(const int &older, const int &newer) override {
+             void replaced(const int &older, const int &newer) override {
                 throw int(newer * 0x10000 + older);
             }
     };

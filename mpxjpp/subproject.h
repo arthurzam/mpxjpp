@@ -20,10 +20,10 @@ class SubProject final {
         std::string m_dosFileName;
         std::string m_fileName;
     public:
-        MPXJPP_GETTER_SETTER(dosFullPath, std::string)
-        MPXJPP_GETTER_SETTER(fullPath, std::string)
-        MPXJPP_GETTER_SETTER(dosFileName, std::string)
-        MPXJPP_GETTER_SETTER(fileName, std::string)
+        MPXJPP_GETTER_SETTER(dosFullPath, const std::string &)
+        MPXJPP_GETTER_SETTER(fullPath, const std::string &)
+        MPXJPP_GETTER_SETTER(dosFileName, const std::string &)
+        MPXJPP_GETTER_SETTER(fileName, const std::string &)
         MPXJPP_GETTER_SETTER(taskUniqueID, int)
         MPXJPP_GETTER_SETTER(uniqueIDOffset, int)
 

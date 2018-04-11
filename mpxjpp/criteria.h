@@ -35,7 +35,7 @@ struct hash<mpxjpp::GenericCriteriaPrompt> {
 namespace mpxjpp {
 struct TestOperator final {
 public:
-    enum : int {
+    enum : unsigned {
         IS_ANY_VALUE,
         IS_WITHIN,
         IS_GREATER_THAN,
@@ -52,9 +52,9 @@ public:
         OR
     };
 private:
-    int m_value;
+    unsigned m_value;
 public:
-    constexpr TestOperator(int type = IS_ANY_VALUE) :
+    constexpr TestOperator(unsigned type = IS_ANY_VALUE) :
         m_value(type)
     { }
 
@@ -71,6 +71,7 @@ public:
 
 class GenericCriteria {
     using ObjectArray = std::array<common::any, 2>;
+    using CriteriaMap = std::unordered_map<GenericCriteriaPrompt, common::any>;
 private:
     ProjectProperties &m_properties;
     FieldType m_leftValue;
@@ -93,7 +94,7 @@ public:
 
     void setRightValue(unsigned index, const common::any &value);
 
-    bool evaluate(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const;
+    bool evaluate(FieldContainer &container, const CriteriaMap &promptValues) const;
 
     MPXJPP_GETTER(criteriaList, const std::vector<std::unique_ptr<GenericCriteria>> &)
 
@@ -101,8 +102,8 @@ public:
         m_criteriaList.push_back(std::move(criteria));
     }
 private:
-    bool evaluateLogicalOperator(FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const;
-    ObjectArray processSymbolicValues(const ObjectArray &oldValues, FieldContainer &container, std::unordered_map<GenericCriteriaPrompt, common::any> promptValues) const;
+    bool evaluateLogicalOperator(FieldContainer &container, const CriteriaMap &promptValues) const;
+    ObjectArray processSymbolicValues(const ObjectArray &oldValues, FieldContainer &container, const CriteriaMap &promptValues) const;
 };
 
 class GraphicalIndicatorCriteria final : public GenericCriteria {
