@@ -11,6 +11,21 @@ ResourceAssignment::ResourceAssignment(ProjectFile &file, std::shared_ptr<mpxjpp
         set_uniqueID(file.projectConfig().getNextAssignmentUniqueID());
 }
 
+TimephasedWorkContainer::data_type ResourceAssignment::timephasedOvertimeWork() {
+    if (!m_timephasedOvertimeWork && m_timephasedWork) {
+        const Duration remainingOvertimeWork = this->remainingOvertimeWork();
+        const Duration remainingWork = this->remainingWork();
+        double perDayFactor = remainingOvertimeWork.duration() / (remainingWork.duration() - remainingOvertimeWork.duration());
+        double totalFactor = remainingOvertimeWork.duration() / remainingWork.duration();
+
+        perDayFactor = std::isnan(perDayFactor) ? 0 : perDayFactor;
+        totalFactor = std::isnan(totalFactor) ? 0 : totalFactor;
+
+        m_timephasedOvertimeWork = std::make_unique<DefaultTimephasedWorkContainer>(*m_timephasedWork, perDayFactor, totalFactor);
+    }
+    return (m_timephasedOvertimeWork ? m_timephasedOvertimeWork->data() : TimephasedWorkContainer::data_type{});
+}
+
 Task *ResourceAssignment::task() {
     if(!m_task)
         m_task = parentFile().getTaskByUniqueID(taskUniqueID());

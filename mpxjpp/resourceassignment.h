@@ -59,7 +59,7 @@ private:
     std::shared_ptr<Task> m_task;
 
     bool m_eventsEnabled = true;
-//  DefaultTimephasedWorkContainer m_timephasedWork;
+    std::unique_ptr<DefaultTimephasedWorkContainer> m_timephasedWork;
     std::vector<TimephasedCost> m_timephasedCost;
 
     std::unique_ptr<TimephasedWorkContainer> m_timephasedActualWork;
@@ -84,6 +84,14 @@ public:
     void set_timephasedActualWork(std::unique_ptr<TimephasedWorkContainer> &&data) {
         m_timephasedActualWork = std::move(data);
     }
+    TimephasedWorkContainer::data_type timephasedWork() const {
+        return (m_timephasedWork ? m_timephasedWork->data() : TimephasedWorkContainer::data_type{});
+    }
+    void set_timephasedWork(std::unique_ptr<DefaultTimephasedWorkContainer> &&data) {
+        m_timephasedWork = std::move(data);
+    }
+    TimephasedWorkContainer::data_type timephasedOvertimeWork();
+
 
     ResourceAssignmentWorkgroupFields &workgroupAssignment() {
         return m_workgroup;

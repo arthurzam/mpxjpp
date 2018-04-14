@@ -3,6 +3,7 @@
 
 #include <ctime>
 #include <vector>
+#include <functional>
 
 #include "common/calendar.h"
 #include "duration.h"
@@ -30,6 +31,11 @@ class TimephasedItem {
               m_start(start), m_finish(finish), m_modified(modified)
         {}
 
+        TimephasedItem(const TimephasedItem &other, double totalFactor, double perDayFactor) :
+            TimephasedItem(other.start(), other.finish(), other.modified(),
+                           other.totalAmount() * totalFactor, other.amountPerDay() * perDayFactor)
+        {}
+
         MPXJPP_GETTER_SETTER(start, common::DateTime)
         MPXJPP_GETTER_SETTER(totalAmount, T)
         MPXJPP_GETTER_SETTER(finish, common::DateTime)
@@ -54,29 +60,49 @@ class TimephasedItemContainer {
 };
 
 template <typename T>
-class TimephasedItemNormaliser {
-public:
-    virtual void normalise(ProjectCalendar &calendar, std::vector<TimephasedItem<T>> & list) = 0;
-};
+using TimephasedItemNormaliser = std::function<void(ProjectCalendar &calendar, std::vector<TimephasedItem<T>> &list)>;
 
 using TimephasedCost = TimephasedItem<double>;
-using TimephasedCostContainer = TimephasedItemContainer<TimephasedCost>;
+using TimephasedCostContainer = TimephasedItemContainer<double>;
 using TimephasedCostNormaliser = TimephasedItemNormaliser<double>;
 
-class TimephasedWork final : public TimephasedItem<Duration> {
-    public:
-        TimephasedWork() = default;
-        TimephasedWork(const TimephasedWork &other) = default;
-
-        TimephasedWork(const TimephasedWork &other, double totalFactor, double perDayFactor) :
-            TimephasedItem<Duration>(other.start(), other.finish(), other.modified(),
-                                     Duration(other.totalAmount().duration() * totalFactor, other.totalAmount().units()),
-                                     Duration(other.amountPerDay().duration() * perDayFactor, other.amountPerDay().units()))
-        {}
-};
-
+using TimephasedCost = TimephasedItem<double>;
 using TimephasedWorkContainer = TimephasedItemContainer<Duration>;
 using TimephasedWorkNormaliser = TimephasedItemNormaliser<Duration>;
+
+template <typename T>
+class DefaultTimephasedItemContainer final : public TimephasedItemContainer<T> {
+    using data_type = typename TimephasedItemContainer<T>::data_type;
+private:
+    data_type m_data;
+    ProjectCalendar &m_calendar;
+    TimephasedItemNormaliser<T> m_normaliser;
+    bool m_raw;
+public:
+    DefaultTimephasedItemContainer(ProjectCalendar &calendar, TimephasedItemNormaliser<T> normaliser,
+                                   const data_type &data, bool raw) :
+        m_data(data), m_calendar(calendar), m_normaliser(normaliser), m_raw(raw)
+    { }
+
+    DefaultTimephasedItemContainer(const DefaultTimephasedItemContainer &source, double perDayFactor, double totalFactor) :
+        m_calendar(source.m_calendar), m_normaliser(source.m_normaliser), m_raw(source.m_raw) {
+        m_data.reserve(source.m_data.size());
+        for (const auto &item : source.m_data)
+            m_data.emplace_back(item, totalFactor, perDayFactor);
+    }
+
+    const data_type &data() const override {
+        return m_data;
+    }
+
+    bool hasData() const override {
+        return !m_data.empty();
+    }
+};
+
+using DefaultTimephasedCostContainer = DefaultTimephasedItemContainer<double>;
+using DefaultTimephasedWorkContainer = DefaultTimephasedItemContainer<Duration>;
+
 }
 
 namespace std {

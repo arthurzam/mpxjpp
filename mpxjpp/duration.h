@@ -142,6 +142,10 @@ class Duration final {
         static Duration sub(Duration a, Duration b, ProjectProperties &defaults) {
             return Duration{ a.duration() - b.convertUnits(a.units(), defaults).duration(), a.units() };
         }
+
+        Duration operator* (double factor) const {
+            return {m_duration * factor, m_units};
+        }
 };
 
 static_assert(std::is_polymorphic<Duration>::value == false, "Duration has vtable!");
