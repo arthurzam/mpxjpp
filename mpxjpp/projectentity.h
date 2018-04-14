@@ -23,49 +23,10 @@ class ProjectEntity {
         }
 };
 
-/**
- * Implemented by entities which can be identified by a Unique ID.
- */
-class ProjectEntityWithUniqueID {
-    public:
-        /**
-         * Retrieve the Unique ID value of the entity.
-         *
-         * @return Unique ID value
-         */
-        virtual int uniqueID() const = 0;
-
-        /**
-         * Set the Unique ID value of the entity.
-         *
-         * @param id Unique ID value
-         */
-        virtual void set_uniqueID(int id) = 0;
-};
-
-/**
- * Implemented by entities which can be identified by an ID.
- */
-class ProjectEntityWithID : public ProjectEntityWithUniqueID {
-public:
-    /**
-     * Retrieve the ID value of the entity.
-     *
-     * @return ID value
-     */
-    virtual int id() const = 0;
-
-    /**
-     * Set the ID value of the entity.
-     *
-     * @param id ID value
-     */
-    virtual void set_id(int id) = 0;
-};
-
 template <typename T>
 class ProjectEntityContainer : public ListWithCallbacks<std::shared_ptr<T>> {
-    static_assert(std::is_base_of<ProjectEntityWithUniqueID, T>::value, "T should derive from ProjectEntityWithUniqueID");
+    static_assert (std::is_same<int, decltype (std::declval<T>().uniqueID())>::value, "uniqueID function should return int");
+    static_assert (std::is_same<void, decltype (std::declval<T>().set_uniqueID(1))>::value, "set_uniqueID function should return void");
 protected:
     ProjectFile &m_mpx;
     std::map<int, std::shared_ptr<T>> m_uniqueIDMap;
@@ -95,7 +56,7 @@ public:
 
     std::shared_ptr<T> getByUniqueID(int id) {
         auto search = m_uniqueIDMap.find(id);
-        return (search == m_uniqueIDMap.end() ? std::shared_ptr<T>() : search->second);
+        return (search == m_uniqueIDMap.cend() ? std::shared_ptr<T>() : search->second);
     }
     void unmapUniqueID(int id) {
        m_uniqueIDMap.erase(id);
@@ -107,7 +68,8 @@ public:
 
 template <typename T>
 class ProjectEntityWithIDContainer : public ProjectEntityContainer<T> {
-    static_assert(std::is_base_of<ProjectEntityWithID, T>::value, "T should derive from ProjectEntityWithID");
+    static_assert (std::is_same<int, decltype (std::declval<T>().id())>::value, "id function should return int");
+    static_assert (std::is_same<void, decltype (std::declval<T>().set_id(1))>::value, "set_id function should return void");
 protected:
     std::map<int, std::shared_ptr<T>> m_idMap;
 public:
@@ -118,7 +80,7 @@ public:
     void renumberIDs() {
         if (!this->empty()) {
             std::sort(this->begin(), this->end(),
-                      [] (const std::shared_ptr<T> &a, const std::shared_ptr<T> &b) { return *a < *b; });
+                      [] (const auto &a, const auto &b) { return a->id() < b->id(); });
             int id = this->front()->id();
             if (id != 0)
                 id = 1;
@@ -129,7 +91,7 @@ public:
 
     std::shared_ptr<T> getByID(int id) const {
         auto search = m_idMap.find(id);
-        return (search == m_idMap.end() ? std::shared_ptr<T>() : search->second);
+        return (search == m_idMap.cend() ? std::shared_ptr<T>() : search->second);
     }
     void unmapID(int id) {
        m_idMap.erase(id);

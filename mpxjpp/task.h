@@ -51,7 +51,7 @@ public:
     virtual TaskPtr addTask() = 0;
 };
 
-class Task final : public FieldContainer, public ProjectEntity, public ProjectEntityWithID, public ChildTaskContainer,
+class Task final : public FieldContainer, public ProjectEntity, public ChildTaskContainer,
         public std::enable_shared_from_this<Task> {
 public:
     using RelationList = std::vector<Relation>;
@@ -157,16 +157,11 @@ public:
     using Date = common::DateTime;
 
 #define FIELDTYPE_CLASS TaskField
-    int uniqueID() const override {
-        return _field_get<int>(TaskField::UNIQUE_ID);
-    }
-    void set_uniqueID(int varName) override {
-        _field_set<int>(TaskField::UNIQUE_ID, varName);
-    }
-    int id() const override {
+    MPXJPP_FIELD_GETTER_SETTER(uniqueID, int, UNIQUE_ID)
+    int id() const {
         return _field_get<int>(TaskField::ID);
     }
-    void set_id(int val) override;
+    void set_id(int val);
 
     const ProjectCalendar *effectiveCalendar();
     MPXJPP_FIELD_GETTER(calendar, const ProjectCalendar *, CALENDAR)
@@ -415,14 +410,6 @@ public:
         return isRelated(task, successors());
     }
 #undef FIELDTYPE_CLASS
-
-    bool operator <(const Task &x) const {
-        return this->id() < x.id();
-    }
-
-    int compareTo(const Task &o) {
-        return this->id() - o.id();
-    }
 private:
     static bool isRelated(const Task *task, const RelationList &list);
 };

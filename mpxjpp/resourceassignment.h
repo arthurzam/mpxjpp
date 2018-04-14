@@ -44,7 +44,7 @@ public:
     MPXJPP_GETTER_SETTER(responsePending, bool)
 };
 
-class ResourceAssignment final : public FieldContainer, public ProjectEntity, public ProjectEntityWithUniqueID,
+class ResourceAssignment final : public FieldContainer, public ProjectEntity,
         public std::enable_shared_from_this<ResourceAssignment> {
 public:
     static constexpr double DEFAULT_UNITS = 100;

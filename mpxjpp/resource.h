@@ -17,7 +17,7 @@ namespace mpxjpp {
 class ResourceAssignment;
 using ResourceAssignmentPtr = std::shared_ptr<ResourceAssignment>;
 
-class Resource final : public FieldContainer, public ProjectEntity, public ProjectEntityWithID,
+class Resource final : public FieldContainer, public ProjectEntity,
         public std::enable_shared_from_this<Resource> {
 public:
     struct FinderResource {
@@ -81,16 +81,12 @@ public:
     Date finish() const;
 
 #define FIELDTYPE_CLASS ResourceField
-    int uniqueID() const override {
-        return _field_get<int>(ResourceField::UNIQUE_ID);
-    }
-    void set_uniqueID(int varName) override {
-        _field_set<int>(ResourceField::UNIQUE_ID, varName);
-    }
-    int id() const override {
+    MPXJPP_FIELD_GETTER_SETTER(uniqueID, int, UNIQUE_ID)
+    int id() const {
         return _field_get<int>(ResourceField::ID);
     }
-    void set_id(int val) override;
+    void set_id(int val);
+
     MPXJPP_FIELD_GETTER(resourceCalendar, const ProjectCalendar *, CALENDAR)
     void set_resourceCalendar(ProjectCalendar *calendar) {
         _field_set<const ProjectCalendar *>(ResourceField::CALENDAR, calendar);
@@ -254,9 +250,6 @@ public:
         return ResourceField::ENTERPRISE_CUSTOM_FIELD1 + (pos - 1); })
 
 #undef FIELDTYPE_CLASS
-    bool operator <(const Resource &x) const {
-        return this->id() < x.id();
-    }
 };
 using ResourcePtr = std::shared_ptr<Resource>;
 

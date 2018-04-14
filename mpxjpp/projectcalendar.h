@@ -277,7 +277,7 @@ public:
     }
 };
 
-class ProjectCalendar final : public ProjectCalendarWeek, public ProjectEntityWithUniqueID {
+class ProjectCalendar final : public ProjectCalendarWeek {
 public:
     static constexpr const char *DEFAULT_BASE_CALENDAR_NAME = "Standard";
     struct FinderCalendar {
