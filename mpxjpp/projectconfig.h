@@ -3,6 +3,8 @@
 
 #include "mpxjpp-gens.h"
 
+#include <functional>
+
 namespace mpxjpp {
 
 class ProjectFile;
@@ -22,7 +24,7 @@ class ProjectConfig
             Flags_autoResourceID         = 0x100
         };
 
-        ProjectFile &m_parent;
+        std::reference_wrapper<ProjectFile> m_parent;
         int m_flags =
                 // Flags_autoWBS is false
                 Flags_autoOutlineLevel |

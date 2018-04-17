@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <functional>
 
 #include "mpxjpp-gens.h"
 
@@ -12,13 +13,13 @@ class Filter;
 
 class ViewState final {
     private:
-        ProjectFile *m_mpx;
+        std::reference_wrapper<ProjectFile> m_mpx;
         std::string m_viewName;
         std::vector<int> m_uniqueIdList;
         int m_filterID;
     public:
-        ViewState(ProjectFile &mpx, const std::string &viewName, std::vector<int> uniqueIdList, int filterID)
-            : m_mpx(&mpx), m_viewName(viewName), m_uniqueIdList(uniqueIdList), m_filterID(filterID)
+        ViewState(ProjectFile &mpx, std::string &&viewName, std::vector<int> &&uniqueIdList, int filterID)
+            : m_mpx(mpx), m_viewName(std::move(viewName)), m_uniqueIdList(std::move(uniqueIdList)), m_filterID(filterID)
         { }
         ViewState(const ViewState &) = default;
         ViewState(ViewState &&) = default;

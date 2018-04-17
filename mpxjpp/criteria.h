@@ -70,10 +70,11 @@ public:
 };
 
 class GenericCriteria {
+public:
     using ObjectArray = std::array<common::any, 2>;
     using CriteriaMap = std::unordered_map<GenericCriteriaPrompt, common::any>;
 private:
-    ProjectProperties &m_properties;
+    std::reference_wrapper<ProjectProperties> m_properties;
     FieldType m_leftValue;
     TestOperator m_testOperator;
     ObjectArray m_definedRightValues;

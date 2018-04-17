@@ -22,9 +22,9 @@ struct CustomFieldValueItem final {
 
 class CustomFieldContainer;
 
-class CustomFieldLookupTable : public ListWithCallbacks<CustomFieldValueItem> {
+class CustomFieldLookupTable final : public ListWithCallbacks<CustomFieldValueItem> {
 private:
-    CustomFieldContainer &m_parent;
+    std::reference_wrapper<CustomFieldContainer> m_parent;
 protected:
      void added(unsigned index) override;
      void removed(const CustomFieldValueItem &item) override;
@@ -34,10 +34,10 @@ public:
     { }
 };
 
-class CustomField {
+class CustomField final {
 private:
     FieldType m_field;
-    CustomFieldContainer &m_parent;
+    std::reference_wrapper<CustomFieldContainer> m_parent;
     CustomFieldLookupTable m_table;
     GraphicalIndicator m_indicator;
     std::string m_alias;
@@ -57,7 +57,7 @@ public:
     void set_alias(const std::string &alias);
 };
 
-class CustomFieldContainer {
+class CustomFieldContainer final {
 private:
     std::vector<std::unique_ptr<CustomField>> m_configMap;
     std::vector<CustomFieldValueItem*> m_valueMap;

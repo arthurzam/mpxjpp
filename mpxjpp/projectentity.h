@@ -4,6 +4,7 @@
 #include <algorithm>
 #include <map>
 #include <memory>
+#include <functional>
 
 #include "listwithcallbacks.h"
 
@@ -12,7 +13,7 @@ class ProjectFile;
 
 class ProjectEntity {
     private:
-        ProjectFile &m_mpx;
+        std::reference_wrapper<ProjectFile> m_mpx;
     protected:
         ProjectEntity(ProjectFile &mpx)
             : m_mpx(mpx)
@@ -62,7 +63,7 @@ public:
        m_uniqueIDMap.erase(id);
     }
     void mapUniqueID(int id, std::shared_ptr<T> entity) {
-        m_uniqueIDMap.insert({id, entity});
+        m_uniqueIDMap.emplace(id, entity);
     }
 };
 
@@ -97,7 +98,7 @@ public:
        m_idMap.erase(id);
     }
     void mapID(int id, std::shared_ptr<T> entity) {
-        m_idMap.insert({id, entity});
+        m_idMap.emplace(id, entity);
     }
 
 };

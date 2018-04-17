@@ -5,16 +5,16 @@
 using namespace mpxjpp;
 
 void CustomFieldLookupTable::added(unsigned index) {
-    m_parent.registerValue(&(*this)[index]);
+    m_parent.get().registerValue(&(*this)[index]);
 }
 
 void CustomFieldLookupTable::removed(const CustomFieldValueItem &item) {
-    m_parent.deregisterValue(&item);
+    m_parent.get().deregisterValue(&item);
 }
 
 void CustomField::set_alias(const std::string &alias) {
     m_alias = alias;
-    m_parent.registerAlias(m_field, alias);
+    m_parent.get().registerAlias(m_field, alias);
 }
 
 CustomField &CustomFieldContainer::getCustomField(FieldType field) {

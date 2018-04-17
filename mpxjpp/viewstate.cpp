@@ -4,5 +4,5 @@
 using namespace mpxjpp;
 
 Filter *ViewState::filter() const {
-    return m_mpx->filters().getFilterByID(m_filterID);
+    return m_mpx.get().filters().getFilterByID(m_filterID);
 }
