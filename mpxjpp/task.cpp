@@ -188,12 +188,12 @@ Task::Date Task::completeThrough() {
                 Duration duration = this->duration();
                 double durationValue = (duration.duration() * percentComplete) / 100;
                 duration = Duration{durationValue, duration.units()};
-//                ProjectCalendar &calendar = getEffectiveCalendar();
+                const ProjectCalendar *calendar = effectiveCalendar();
 //                value = calendar.getDate(actualStart, duration, true);
                 // _field_set<Date>(TaskField::COMPLETE_THROUGH, value);
         }
     }
-    return value.cast<Date>();
+    return common::any_type_cast<Date>::get(value, {});
 }
 
 bool Task::critical() {
@@ -209,7 +209,7 @@ bool Task::critical() {
         _field_set<bool>(TaskField::CRITICAL, result);
         return result;
     }
-    return _field_get<bool>(TaskField::CRITICAL);
+    return common::any_type_cast<bool>::get(critical, false);
 }
 
 Duration Task::durationVariance() {
@@ -219,7 +219,7 @@ Duration Task::durationVariance() {
         _field_set<Duration>(TaskField::DURATION_VARIANCE, result);
         return result;
     }
-    return variance.cast<Duration>();
+    return common::any_type_cast<Duration>::get(variance, {});
 }
 
 Duration Task::finishVariance() {
@@ -234,7 +234,7 @@ Duration Task::workVariance() {
         _field_set<Duration>(TaskField::WORK_VARIANCE, result);
         return result;
     }
-    return variance.cast<Duration>();
+    return common::any_type_cast<Duration>::get(variance, {});
 }
 
 Duration Task::totalSlack() {
@@ -258,13 +258,13 @@ Duration Task::totalSlack() {
         _field_set<Duration>(TaskField::TOTAL_SLACK, result);
         return result;
     }
-    return variance.cast<Duration>();
+    return common::any_type_cast<Duration>::get(variance, {});
 }
 
 void Task::set_id(int val) {
     const common::any &previous = getCachedValue(TaskField::ID);
     if(!previous.empty())
-        parentFile().allTasks().unmapID(previous.cast<int>());
+        parentFile().allTasks().unmapID(common::any_type_cast<int>::get(previous, 0));
     parentFile().allTasks().mapID(val, shared_from_this());
     _field_set<int>(TaskField::ID, val);
 }
@@ -278,7 +278,7 @@ const ProjectCalendar *Task::effectiveCalendar() {
 
 Relation Task::addPredecessor(TaskPtr targetTask, RelationType type, Duration lag) {
     // insert relation to targetTask->successors
-    RelationList &successorList = targetTask->getCachedValue(TaskField::SUCCESSORS).get_assign<RelationList>({});
+    auto &successorList = targetTask->getCachedValue(TaskField::SUCCESSORS).get_assign<RelationList>({});
     int pos = -1;
     for(const auto &relation : successorList)
         if (relation.targetTask().get() == this && relation.type() == type && relation.lag() == lag) {
@@ -289,12 +289,10 @@ Relation Task::addPredecessor(TaskPtr targetTask, RelationType type, Duration la
         successorList.emplace_back(targetTask, shared_from_this(), type, lag);
 
     // insert relation to this->predecessors
-    RelationList &predecessorList = getCachedValue(TaskField::PREDECESSORS).get_assign<RelationList>({});
-    for(const auto &relation : predecessorList) {
-        if (relation.targetTask() == targetTask && relation.type() == type && relation.lag() == lag) {
+    auto &predecessorList = getCachedValue(TaskField::PREDECESSORS).get_assign<RelationList>({});
+    for(const auto &relation : predecessorList)
+        if (relation.targetTask() == targetTask && relation.type() == type && relation.lag() == lag)
             return relation;
-        }
-    }
     predecessorList.emplace_back(shared_from_this(), targetTask, type, lag);
     return predecessorList.back();
 }
@@ -310,18 +308,18 @@ static bool removeRelation(Task::RelationList &relationList, const Task *targetT
 }
 
 bool Task::removePredecessor(const Task *targetTask, RelationType type, Duration lag) {
-    RelationList &predecessorList = getCachedValue(TaskField::PREDECESSORS).get_assign<RelationList>({});
+    auto &predecessorList = getCachedValue(TaskField::PREDECESSORS).get_assign<RelationList>({});
     if (removeRelation(predecessorList, targetTask, type, lag)) {
-        RelationList &successorList = targetTask->getCachedValue(TaskField::SUCCESSORS).get_assign<RelationList>({});
-        removeRelation(successorList, this, type, lag);
-        return true;
+        auto &successorList = targetTask->getCachedValue(TaskField::SUCCESSORS).get_assign<RelationList>({});
+        return removeRelation(successorList, this, type, lag);
     }
     return false;
 }
 
 bool Task::isRelated(const Task *task, const RelationList &list) {
+    const int taskUniqueID = task->uniqueID();
     for (const auto &relation : list)
-        if(relation.targetTask()->uniqueID() == task->uniqueID())
+        if(relation.targetTask()->uniqueID() == taskUniqueID)
             return true;
     return false;
 }
@@ -357,7 +355,7 @@ void TaskContainer::removed(const TaskPtr &task) {
 
 TaskPtr TaskContainer::create() {
     auto task = std::make_shared<Task>(m_mpx);
-    ListWithCallbacks<TaskPtr>::add(task);
+    add(task);
     m_mpx.childTasks().push_back(task);
     return task;
 }
@@ -410,21 +408,15 @@ void TaskContainer::updateStructure() {
 
 void TaskContainer::synchronizeTaskIDToHierarchy() {
     clear();
-
-    int currentID = (!getByID(0) ? 1 : 0);
-    for (auto &task : m_mpx.childTasks())
-    {
-       task->set_id(currentID++);
-       add(task);
-       currentID = synchroizeTaskIDToHierarchy(task.get(), currentID);
-    }
+    const int currentID = (!getByID(0) ? 1 : 0);
+    synchroizeTaskIDToHierarchy(m_mpx.childTasks(), currentID);
 }
 
-int TaskContainer::synchroizeTaskIDToHierarchy(Task *parentTask, int currentID) {
-    for (auto &task : parentTask->childTasks()) {
+int TaskContainer::synchroizeTaskIDToHierarchy(const std::vector<TaskPtr> &tasks, int currentID) {
+    for (auto &task : tasks) {
         task->set_id(currentID++);
         add(task);
-        currentID = synchroizeTaskIDToHierarchy(task.get(), currentID);
+        currentID = synchroizeTaskIDToHierarchy(task->childTasks(), currentID);
     }
     return currentID;
 }

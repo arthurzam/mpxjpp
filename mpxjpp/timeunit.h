@@ -43,7 +43,7 @@ private:
     unsigned m_value;
 
 public:
-    constexpr TimeUnit(unsigned type) :
+    constexpr TimeUnit(unsigned type = MINUTES) :
         m_value(type)
     {}
     constexpr explicit operator unsigned() const {

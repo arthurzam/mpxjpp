@@ -51,7 +51,7 @@ Resource::Date Resource::finish() const {
 void Resource::set_id(int val) {
     const common::any &previous = getCachedValue(ResourceField::ID);
     if(!previous.empty())
-        parentFile().allResources().unmapID(previous.cast<int>());
+        parentFile().allResources().unmapID(common::any_type_cast<int>::get(previous, 0));
     parentFile().allResources().mapID(val, shared_from_this());
     _field_set<int>(ResourceField::ID, val);
 }

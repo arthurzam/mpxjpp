@@ -33,12 +33,12 @@ CostRateTable *ResourceAssignment::costRateTable() {
 
 ResourceAssignment::Date ResourceAssignment::start() {
     const common::any &result = getCachedValue(AssignmentField::START);
-    return result.empty() ? task()->start() : result.get<Date>({});
+    return result.empty() ? task()->start() : common::any_type_cast<Date>::get(result, {});
 }
 
 ResourceAssignment::Date ResourceAssignment::finish() {
     const common::any &result = getCachedValue(AssignmentField::FINISH);
-    return result.empty() ? task()->finish() : result.get<Date>({});
+    return result.empty() ? task()->finish() : common::any_type_cast<Date>::get(result, {});
 }
 
 double ResourceAssignment::percentageWorkComplete() {
@@ -49,7 +49,7 @@ double ResourceAssignment::percentageWorkComplete() {
         _field_set<double>(AssignmentField::PERCENT_WORK_COMPLETE, result);
         return result;
     }
-    return variance.cast<double>();
+    return common::any_type_cast<double>::get(variance, {});
 }
 
 Duration ResourceAssignment::workVariance() {
@@ -59,7 +59,7 @@ Duration ResourceAssignment::workVariance() {
         _field_set<Duration>(AssignmentField::WORK_VARIANCE, result);
         return result;
     }
-    return variance.cast<Duration>();
+    return common::any_type_cast<Duration>::get(variance, {});
 }
 
 void ResourceAssignmentContainer::removed(const ResourceAssignmentPtr &assignment) {

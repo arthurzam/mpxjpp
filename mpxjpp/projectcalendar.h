@@ -132,7 +132,7 @@ public:
     MPXJPP_GETTER(parent, ProjectCalendarWeek *)
     void set_parent(ProjectCalendarWeek *parent) {
         m_parent = parent;
-        for(int i = 0; i < 7; i++)
+        for(unsigned i = 0; i < 7; i++)
             if (m_days[i] == DayType::__UNINITIALIZED__)
                 m_days[i] = DayType::DEFAULT;
     }
@@ -167,8 +167,8 @@ public:
     ProjectCalendarHours *addCalendarHours(Day day) {
         std::unique_ptr<ProjectCalendarHours> bch = std::make_unique<ProjectCalendarHours>(*this);
         bch->set_day(day);
-        m_hours[static_cast<int>(day) - 1] = std::move(bch);
-        return m_hours[static_cast<int>(day) - 1].get();
+        m_hours[static_cast<unsigned>(day) - 1] = std::move(bch);
+        return m_hours[static_cast<unsigned>(day) - 1].get();
     }
 
     /**
@@ -181,7 +181,7 @@ public:
      * @return calendar hours
      */
     const ProjectCalendarHours *calendarHours(Day day) const {
-        return (m_hours[static_cast<int>(day)- 1].get());
+        return (m_hours[static_cast<unsigned>(day)- 1].get());
     }
 
     /**
@@ -225,7 +225,7 @@ public:
      * hours to a calendar.
      */
     void addDefaultCalendarHours() {
-       for (int i = 1; i <= 7; i++) {
+       for (unsigned i = 1; i <= 7; i++) {
           addDefaultCalendarHours(static_cast<Day>(i));
        }
     }
@@ -239,7 +239,7 @@ public:
     virtual void attachHoursToDay(ProjectCalendarHours *hours) {
         if (&hours->parentCalendar() != this)
             throw std::invalid_argument("bad ownship");
-        m_hours[static_cast<int>(hours->day()) - 1].reset(hours);
+        m_hours[static_cast<unsigned>(hours->day()) - 1].reset(hours);
     }
 
     /**
@@ -251,7 +251,7 @@ public:
     virtual void removeHoursFromDay(ProjectCalendarHours &hours) {
         if (&hours.parentCalendar() != this)
             throw std::invalid_argument("bad ownship");
-        m_hours[static_cast<int>(hours.day()) - 1].reset(nullptr);
+        m_hours[static_cast<unsigned>(hours.day()) - 1].reset(nullptr);
     }
 
     const std::array<DayType, 7> &days() const {
@@ -259,11 +259,11 @@ public:
     }
 
     DayType workingDay(Day day) {
-        return m_days[static_cast<int>(day) - 1];
+        return m_days[static_cast<unsigned>(day) - 1];
     }
 
     void set_workingDay(Day day, DayType working) {
-        m_days[static_cast<int>(day) - 1] =
+        m_days[static_cast<unsigned>(day) - 1] =
                 (working != DayType::__UNINITIALIZED__) ? working :
                 isDerived() ? DayType::DEFAULT : DayType::WORKING;
     }
@@ -386,7 +386,7 @@ using ProjectCalendarPtr = std::shared_ptr<ProjectCalendar>;
 
 class ProjectCalendarContainer final : public ProjectEntityContainer<ProjectCalendar> {
 protected:
-    virtual void removed(const ProjectCalendarPtr &cal) override;
+    void removed(const ProjectCalendarPtr &cal) override;
 public:
     ProjectCalendarContainer(ProjectFile &file) :
         ProjectEntityContainer<ProjectCalendar>(file)

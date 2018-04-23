@@ -20,7 +20,7 @@ public:
 private:
     int m_value;
 public:
-    constexpr Priority(int p) :
+    constexpr Priority(int p = 0) :
         m_value((p < 0 || p > DO_NOT_LEVEL) ? MEDIUM : p)
         {}
 

@@ -432,7 +432,7 @@ public:
     void updateStructure();
     void synchronizeTaskIDToHierarchy();
 private:
-    int synchroizeTaskIDToHierarchy(Task *parentTask, int currentID);
+    int synchroizeTaskIDToHierarchy(const std::vector<TaskPtr> &tasks, int currentID);
 
     // ListWithCallbacks interface
 };
