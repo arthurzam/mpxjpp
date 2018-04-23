@@ -7,7 +7,7 @@ QT       += core
 
 INCLUDEPATH += ../
 
-SOURCES += main.cpp \
+SOURCES += \
     mpp/criteriareader.cpp \
     projectconfig.cpp \
     enums.cpp \
@@ -73,3 +73,7 @@ HEADERS += \
 QMAKE_CXXFLAGS_RELEASE += -Wpedantic -Wextra
 QMAKE_CXXFLAGS_RELEASE += -flto -fuse-linker-plugin
 QMAKE_LFLAGS_RELEASE += -flto -fuse-linker-plugin
+
+INCLUDEPATH += $$PWD/..
+DEPENDPATH += $$PWD/..
+unix:!macx: LIBS += -L$$OUT_PWD/../poifs/ -lpoifs
