@@ -85,6 +85,7 @@ protected:
     { }
 public:
     constexpr FieldType() = default;
+    FieldType(unsigned value, FieldTypeClass typeClass);
 
     constexpr FieldTypeClass fieldTypeClass() const {
         return m_arr->typeClass;

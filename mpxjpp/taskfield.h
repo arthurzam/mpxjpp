@@ -6,6 +6,7 @@
 namespace mpxjpp {
 
 struct TaskField final : public FieldType {
+    friend struct FieldType;
 
 #define TASK_FIELD_GEN(F) \
     F(START, DataType::DATE),\

@@ -50,3 +50,36 @@ struct FieldType::priv_arr_t TaskField::g_class = {
     FieldTypeClass::TASK,
     TaskField::g_fields
 };
+
+FieldType::FieldType(unsigned value, FieldTypeClass typeClass) {
+    unsigned maxVal;
+    switch (typeClass) {
+        case FieldTypeClass::UNKNOWN:
+            m_arr = nullptr;
+            maxVal = value;
+            break;
+        case FieldTypeClass::ASSIGNMENT:
+            m_arr = &AssignmentField::g_class;
+            maxVal = AssignmentField::FINISH;
+            break;
+        case FieldTypeClass::CONSTRAINT:
+            m_arr = &ConstraintField::g_class;
+            maxVal = ConstraintField::TASK2;
+            break;
+        case FieldTypeClass::PROJECT:
+            m_arr = &ProjectField::g_class;
+            maxVal = ProjectField::FINISH_DATE;
+            break;
+        case FieldTypeClass::RESOURCE:
+            m_arr = &ResourceField::g_class;
+            maxVal = ResourceField::FINISH;
+            break;
+        case FieldTypeClass::TASK:
+            m_arr = &TaskField::g_class;
+            maxVal = TaskField::FINISH;
+            break;
+    }
+    if (value > maxVal)
+        throw std::invalid_argument("value is out of bounds for this class type");
+    m_value = static_cast<int>(value);
+}

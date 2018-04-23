@@ -6,6 +6,7 @@
 namespace mpxjpp {
 
 struct ProjectField final : public FieldType {
+    friend struct FieldType;
 
 #define PROJECT_FIELD_GEN(F) \
     F(START_DATE, DataType::DATE),\

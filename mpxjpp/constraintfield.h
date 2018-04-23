@@ -6,6 +6,7 @@
 namespace mpxjpp {
 
 struct ConstraintField final : public FieldType {
+    friend struct FieldType;
 
 #define CONSTRAINT_FIELD_GEN(F) \
     F(UNIQUE_ID, DataType::INTEGER),\

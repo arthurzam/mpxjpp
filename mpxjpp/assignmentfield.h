@@ -6,6 +6,7 @@
 namespace mpxjpp {
 
 struct AssignmentField final : public FieldType {
+    friend struct FieldType;
 
 #define ASSIGNMENT_FIELD_GEN(F) \
     F(START, DataType::DATE),\

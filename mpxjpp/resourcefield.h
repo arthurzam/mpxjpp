@@ -6,7 +6,7 @@
 namespace mpxjpp {
 
 struct ResourceField final : public FieldType {
-
+    friend struct FieldType;
 
 #define RESOURCE_FIELD_GEN(F) \
     F(START, DataType::DATE),\
