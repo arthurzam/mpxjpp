@@ -12,16 +12,16 @@ namespace strutils = mpxjpp::common::strutils;
 namespace {
 
 static const common::any &getSingleOperand(const common::any &operand) {
-    if (operand.isType<std::vector<common::any>>()) {
-        return operand.cast<std::vector<common::any>>()[0];
+    if (operand.isType<GenericCriteria::ObjectArray>()) {
+        return operand.cast<GenericCriteria::ObjectArray>()[0];
     }
     return operand;
 }
 
 static int evaluateWithin(const common::any &lhs, const common::any &rhs) {
-    if (!rhs.isType<std::vector<common::any>>())
+    if (!rhs.isType<GenericCriteria::ObjectArray>())
         return false;
-    const auto &rhsList = rhs.cast<std::vector<common::any>>();
+    const auto &rhsList = rhs.cast<GenericCriteria::ObjectArray>();
     bool isRhsEmpty = rhsList[0].empty() || rhsList[1].empty();
     if (lhs.empty())
         return isRhsEmpty;
@@ -177,31 +177,23 @@ int GraphicalIndicatorCriteria::evaluate(FieldContainer &container) {
 }
 
 int GraphicalIndicator::evaluate(FieldContainer &container) {
-    const CriteriaList *criteria = nullptr;
+    std::reference_wrapper<const CriteriaList> criteria(m_nonSummaryRowCriteria);
     static_assert(std::is_final<Task>::value, "For this part we need Task class as final");
     if (typeid(container) == typeid(Task)) {
         Task &task = static_cast<Task &>(container);
         if (task.uniqueID() == 0) {
             if (!m_projectSummaryInheritsFromSummaryRows)
-                criteria = &m_projectSummaryCriteria;
+                criteria = m_projectSummaryCriteria;
             else if (!m_summaryRowsInheritFromNonSummaryRows)
-                criteria = &m_summaryRowCriteria;
-            else
-                criteria = &m_nonSummaryRowCriteria;
+                criteria = m_summaryRowCriteria;
         } else {
-            if (!task.summary())
-                criteria = &m_nonSummaryRowCriteria;
-            else if (!m_summaryRowsInheritFromNonSummaryRows)
-                criteria = &m_summaryRowCriteria;
-            else
-                criteria = &m_nonSummaryRowCriteria;
+            if (task.summary() && !m_summaryRowsInheritFromNonSummaryRows)
+                criteria = m_summaryRowCriteria;
         }
-    } else {
-        criteria = &m_nonSummaryRowCriteria;
     }
 
     int result;
-    for (const auto &gic : *criteria)
+    for (const auto &gic : criteria.get())
         if ((result = gic->evaluate(container)) != -1)
             return result;
     return 0;
@@ -213,11 +205,10 @@ bool Filter::evaluate(FieldContainer &container, const CriteriaMap &promptValues
     if (m_criteria->evaluate(container, promptValues))
         return true;
     static_assert(std::is_final<Task>::value, "For this part we need Task class as final");
-    if (m_showRelatedSummaryRows)
-        if (typeid(container) == typeid(Task))
-            for (const TaskPtr &t : static_cast<Task &>(container).childTasks())
-                if (Filter::evaluate(*t, promptValues))
-                    return true;
+    if (m_showRelatedSummaryRows && typeid(container) == typeid(Task))
+        for (const TaskPtr &t : static_cast<Task &>(container).childTasks())
+            if (Filter::evaluate(*t, promptValues))
+                return true;
     return true; // CHECK: maybe false - error in upstream
 }
 

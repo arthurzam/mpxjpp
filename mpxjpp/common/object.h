@@ -179,11 +179,6 @@ private:
     template <typename T>
     static constexpr bool is_any = std::is_same<anyimpl::remove_ref_cv_t<T>, any>::value;
 public:
-    template <typename T, std::size_t N>
-    any(const std::array<T, N>& x) {
-        assign(std::vector<T>(x.begin(), x.end()));
-    }
-
     /// Initializing constructor.
     template <typename T>
     any(const T& x) {
@@ -192,8 +187,7 @@ public:
     }
 
     /// Empty constructor.
-    any() noexcept
-    { }
+    any() noexcept = default;
 
     explicit any(std::nullptr_t) noexcept
     { }
