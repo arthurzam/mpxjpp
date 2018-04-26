@@ -2,6 +2,7 @@
 #define UUID_H
 
 #include <cstdint>
+#include <unordered_map>
 
 namespace mpxjpp {
 namespace common {

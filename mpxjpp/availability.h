@@ -20,7 +20,6 @@ struct Availability final {
 //        return range.compareTo(other.range) < 0;
 //    }
 };
-static_assert(std::is_pod<Availability>::value, "Availability should be POD");
 
 class AvailabilityTable final : public std::vector<Availability> {
     public:

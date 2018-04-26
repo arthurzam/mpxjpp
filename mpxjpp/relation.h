@@ -1,6 +1,7 @@
 #ifndef RELATION_H
 #define RELATION_H
 
+#include <memory>
 #include "duration.h"
 
 namespace mpxjpp {

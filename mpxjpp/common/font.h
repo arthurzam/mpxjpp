@@ -2,7 +2,6 @@
 #define FONT_H
 
 #include <string>
-
 #include "../mpxjpp-gens.h"
 
 namespace mpxjpp {

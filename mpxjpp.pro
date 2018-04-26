@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     mpxjpp \
-    tests
+    tests \
+    mpxjpp-tests

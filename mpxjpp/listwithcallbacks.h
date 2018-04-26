@@ -12,23 +12,23 @@ protected:
     virtual void removed(const T &) { }
     virtual void replaced(const T &, const T &) { }
 public:
-    using ListWithCallbacks::vector::vector;
-    using ListWithCallbacks::vector::reserve;
-    using ListWithCallbacks::vector::resize;
-    using ListWithCallbacks::vector::clear;
-    using ListWithCallbacks::vector::shrink_to_fit;
+    using std::vector<T>::vector;
+    using std::vector<T>::reserve;
+    using std::vector<T>::resize;
+    using std::vector<T>::clear;
+    using std::vector<T>::shrink_to_fit;
 
-    using ListWithCallbacks::vector::size;
-    using ListWithCallbacks::vector::empty;
-    using ListWithCallbacks::vector::begin;
-    using ListWithCallbacks::vector::end;
-    using ListWithCallbacks::vector::cbegin;
-    using ListWithCallbacks::vector::cend;
+    using std::vector<T>::size;
+    using std::vector<T>::empty;
+    using std::vector<T>::begin;
+    using std::vector<T>::end;
+    using std::vector<T>::cbegin;
+    using std::vector<T>::cend;
 
-    using ListWithCallbacks::vector::at;
-    using ListWithCallbacks::vector::front;
-    using ListWithCallbacks::vector::back;
-    using ListWithCallbacks::vector::operator [];
+    using std::vector<T>::at;
+    using std::vector<T>::front;
+    using std::vector<T>::back;
+    using std::vector<T>::operator [];
 
     template <typename U>
     void add(U &&val) {
@@ -52,7 +52,7 @@ public:
         added(index);
     }
 
-    T&& set(size_t index, const T &element) {
+    T set(size_t index, const T &element) {
         T &ref(this->at(index));
         T removed(ref);
         ref = element;
@@ -60,7 +60,7 @@ public:
         return std::move(removed);
     }
 
-    T&& remove(size_t index) {
+    T remove(size_t index) {
         T obj(std::move(this->at(index)));
         removed(obj);
         this->erase(begin() + index);

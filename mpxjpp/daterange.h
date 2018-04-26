@@ -10,8 +10,8 @@
 namespace mpxjpp {
 
 struct DateRange final {
-    common::DateTime start;
-    common::DateTime end;
+    common::DateTime start{};
+    common::DateTime end{};
 
     /**
      * This method compares a target date with a date range. The method will
@@ -37,7 +37,6 @@ struct DateRange final {
         return static_cast<int>(result);
     }
 };
-static_assert(std::is_pod<DateRange>::value, "DateRange should be POD");
 
 }
 

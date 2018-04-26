@@ -2,7 +2,6 @@
 #define TIMEUNIT_H
 
 #include <string>
-#include "common/object.h"
 
 namespace mpxjpp {
 
