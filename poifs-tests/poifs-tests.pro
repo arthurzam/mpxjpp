@@ -11,6 +11,7 @@ HEADERS += \
 
 SOURCES += \
     main.cpp \
+    common/tst_bytestream.cpp
 
 
 INCLUDEPATH += $$PWD/../

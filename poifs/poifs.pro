@@ -30,9 +30,13 @@ HEADERS += \
     poifs_global.h \
     common/bytestream.h \
     filesystem/ole10native.h \
-    filesystem/stringutils.h
+    filesystem/stringutils.h \
+    filesystem/entry.h
 
 unix {
     target.path = /usr/lib
     INSTALLS += target
 }
+
+DISTFILES += \
+    filesystem/nodes.qmodel

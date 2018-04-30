@@ -49,22 +49,21 @@ public:
     std::size_t available() const noexcept {
         return static_cast<std::size_t>(m_end - m_curr);
     }
-    bytestream &seekg(std::streamoff pos) {
-        if (pos > m_end - m_start || pos < 0)
+    bytestream &seekg(const_iterator pos) {
+        if (pos > m_end || pos < m_start)
             throw std::invalid_argument("seek out of range");
-        m_curr = m_start + pos;
+        m_curr = pos;
         m_gcount = 0;
         return *this;
+    }
+    bytestream &seekg(std::streamoff pos) {
+        return seekg(m_start + pos);
     }
     bytestream &seekg(std::streamoff off, std::ios::seekdir dir) {
         auto pos = (dir == std::ios::beg ? m_start :
                     dir == std::ios::cur ? m_curr  :
                                            m_end);
-        if (pos + off >= m_end || pos < m_start)
-            throw std::invalid_argument("seek out of range");
-        m_curr = pos + off;
-        m_gcount = 0;
-        return *this;
+        return seekg(pos + off);
     }
     void unread() noexcept {
         m_curr -= static_cast<ssize_t>(m_gcount);
@@ -94,6 +93,9 @@ public:
     template<typename T>
     auto operator>> (T &val) -> std::enable_if_t<std::is_arithmetic<T>::value, bytestream &> {
         return read(&val, sizeof(T));
+    }
+    bytestream &operator>> (std::vector<value_type> &buf) {
+        return read(buf.data(), buf.size());
     }
 };
 

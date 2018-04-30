@@ -3,7 +3,13 @@
 
 using namespace poifs::filesystem;
 
-/*
+const std::u16string Ole10Native::OLE10_NATIVE = u"\u0001Ole10Native";
+
+static const char OLE_MARKER_BYTES[] =
+        { 1, 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+static const std::u16string OLE_MARKER_NAME = u"\u0001Ole";
+
+/**
  * Helper - determine length of zero terminated string (ASCIIZ).
  */
 static size_t getStringLength(bytestream::bytestream &stream) {
@@ -47,6 +53,12 @@ Ole10Native::Ole10Native(bytestream::bytestream &stream) {
             stream >> len32;
             m_command = string_utils::getFromCompressedUnicode(stream, len32);
 
+            // TODO: maybe add the checks for offset
+
+            stream >> dataSize;
+
+            // TODO: maybe add the checks for offset
+
             break;
         case EncodingMode::compact:
             stream >> m_flags1;
@@ -56,4 +68,8 @@ Ole10Native::Ole10Native(bytestream::bytestream &stream) {
             dataSize = m_totalSize;
             break;
     }
+    if (dataSize > stream.available())
+        throw Ole10Native_exception(); // TODO: add string
+    m_dataBuffer.resize(dataSize);
+    stream >> m_dataBuffer;
 }
